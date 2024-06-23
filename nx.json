@@ -40,7 +40,8 @@
         "services/search-e2e/**/*",
         "services/notifications-e2e/**/*",
         "services/drivers-e2e/**/*",
-        "services/payments-e2e/**/*"
+        "services/payments-e2e/**/*",
+        "services/order-assignment-e2e/**/*"
       ]
     }
   ]
