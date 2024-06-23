@@ -1,7 +1,7 @@
 {
-  "name": "service-drivers",
+  "name": "service-users",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
-  "sourceRoot": "services/drivers/src",
+  "sourceRoot": "services/users/src",
   "projectType": "application",
   "tags": [],
   "targets": {
@@ -9,14 +9,14 @@
       "executor": "@nx/js:node",
       "defaultConfiguration": "development",
       "options": {
-        "buildTarget": "service-drivers:build"
+        "buildTarget": "service-users:build"
       },
       "configurations": {
         "development": {
-          "buildTarget": "service-drivers:build:development"
+          "buildTarget": "service-users:build:development"
         },
         "production": {
-          "buildTarget": "service-drivers:build:production"
+          "buildTarget": "service-users:build:production"
         }
       }
     }

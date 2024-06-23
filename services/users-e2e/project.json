@@ -1,17 +1,17 @@
 {
-  "name": "service-drivers-e2e",
+  "name": "service-users-e2e",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "projectType": "application",
-  "implicitDependencies": ["service-drivers"],
+  "implicitDependencies": ["service-users"],
   "targets": {
     "e2e": {
       "executor": "@nx/jest:jest",
       "outputs": ["{workspaceRoot}/coverage/{e2eProjectRoot}"],
       "options": {
-        "jestConfig": "services/drivers-e2e/jest.config.ts",
+        "jestConfig": "services/users-e2e/jest.config.ts",
         "passWithNoTests": true
       },
-      "dependsOn": ["service-drivers:build"]
+      "dependsOn": ["service-users:build"]
     }
   }
 }
