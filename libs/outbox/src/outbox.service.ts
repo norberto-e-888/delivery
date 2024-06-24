@@ -57,13 +57,31 @@ export class OutboxService {
 
             if (!collection) {
               throw new Error(
-                `Collection ${options.aggregate.collection} not found.`
+                `Collection ${options.aggregate.collection} not found`
               );
             }
 
-            const entityId = JSON.parse(payload)[
-              options.aggregate.entityIdKey
-            ] as string;
+            const path = options.aggregate.entityIdKey.split('.');
+            const parsedPayload = JSON.parse(payload);
+            const entityId = path.reduce((curr, key, i) => {
+              if (curr === null || typeof curr !== 'object') {
+                throw new Error(
+                  `Key ${key} at position ${i + 1} from path ${
+                    options.aggregate?.entityIdKey
+                  } does not resolve to a valid object`
+                );
+              }
+
+              return curr[key];
+            }, parsedPayload);
+
+            if (typeof entityId !== 'string') {
+              throw new Error(
+                `Path ${
+                  options.aggregate.entityIdKey
+                } does not resolve to a string. Got type ${typeof entityId} instead`
+              );
+            }
 
             const document = (await collection.findOne({
               _id: Types.ObjectId.createFromHexString(entityId),
@@ -132,7 +150,7 @@ export class OutboxService {
         .execute(new PublishOutboxCommand(returnOutbox))
         .then(() => {
           this.logger.verbose(
-            `Successfully executed PublishOutboxCommand for message with Id ${returnOutbox?.id}.`
+            `Successfully executed PublishOutboxCommand for message with Id ${returnOutbox?.id}`
           );
         })
         .catch((error) => {

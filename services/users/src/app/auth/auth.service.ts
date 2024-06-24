@@ -8,7 +8,7 @@ import {
   UsersTopic,
   usersEventSignUpRoutingKeyGenerators,
 } from '@delivery/api';
-import { User, UserRole } from '@delivery/models';
+import { USERS_COLLECTION, User, UserRole } from '@delivery/models';
 
 import { Model } from 'mongoose';
 import * as bcrypt from 'bcryptjs';
@@ -66,6 +66,10 @@ export class AuthService {
         transformPayload: (user): UsersEventSignUpPayload => ({
           user,
         }),
+        aggregate: {
+          collection: USERS_COLLECTION,
+          entityIdKey: 'user.id',
+        },
       }
     );
 
