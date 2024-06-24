@@ -7,8 +7,8 @@ import { MongooseModule } from '@nestjs/mongoose';
   imports: [
     MongooseModule.forRootAsync({
       inject: [ConfigService],
-      useFactory: (configService: ConfigService<MongocConfig>) => {
-        const mongoConfig = configService.get<MongocConfig['mongo']>('mongo');
+      useFactory: (configService: ConfigService<MongoConfig>) => {
+        const mongoConfig = configService.get<MongoConfig['mongo']>('mongo');
 
         if (!mongoConfig) {
           throw new Error(
@@ -28,6 +28,6 @@ import { MongooseModule } from '@nestjs/mongoose';
 })
 export class AppMongoModule {}
 
-export type MongocConfig = {
+export type MongoConfig = {
   mongo: { uri: string };
 };
