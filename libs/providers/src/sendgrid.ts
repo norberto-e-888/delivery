@@ -1,6 +1,7 @@
 import { Global, Module, Provider } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import sendgrid from '@sendgrid/mail';
+import Joi from 'joi';
 
 export const SENDGRID_PROVIDER_KEY = Symbol('SENDGRID_PROVIDER_KEY');
 export const sendgridProvider: Provider = {
@@ -29,6 +30,12 @@ export const sendgridProvider: Provider = {
   exports: [sendgridProvider],
 })
 export class AppSendgridModule {}
+
+export const sendgridConfigJoiSchema = Joi.object({
+  sendgrid: Joi.object({
+    apiKey: Joi.string().required(),
+  }).required(),
+});
 
 export type SendgridConfig = {
   sendgrid: { apiKey: string };

@@ -1,6 +1,7 @@
 import { Global, Module } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
+import Joi from 'joi';
 
 @Global()
 @Module({
@@ -27,6 +28,12 @@ import { MongooseModule } from '@nestjs/mongoose';
   exports: [MongooseModule],
 })
 export class AppMongoModule {}
+
+export const mongoConfigJoiSchema = Joi.object({
+  mongo: Joi.object({
+    uri: Joi.string().required(),
+  }).required(),
+});
 
 export type MongoConfig = {
   mongo: { uri: string };

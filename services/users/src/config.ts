@@ -3,11 +3,16 @@ import {
   MongoConfig,
   RedisConfig,
   SendgridConfig,
+  jwtConfigJoiSchema,
+  mongoConfigJoiSchema,
+  redisConfigJoiSchema,
+  sendgridConfigJoiSchema,
 } from '@delivery/providers';
-import { CommonConfig } from '@delivery/types';
+import { CommonConfig, commonConfigJoiSchema } from '@delivery/misc';
+import Joi from 'joi';
 
-export const loadConfig = () =>
-  ({
+export const loadConfig = () => {
+  const config = {
     jwt: {
       secret: process.env.JWT_SECRET,
     },
@@ -25,6 +30,24 @@ export const loadConfig = () =>
     misc: {
       port: +process.env.PORT,
     },
-  } as JwtConfig & MongoConfig & RedisConfig & SendgridConfig & CommonConfig);
+  } as JwtConfig & MongoConfig & RedisConfig & SendgridConfig & CommonConfig;
+
+  const validationSchema = Joi.any()
+    .concat(jwtConfigJoiSchema)
+    .concat(mongoConfigJoiSchema)
+    .concat(redisConfigJoiSchema)
+    .concat(sendgridConfigJoiSchema)
+    .concat(commonConfigJoiSchema);
+
+  const { error } = validationSchema.validate(config, {
+    abortEarly: false,
+  });
+
+  if (error) {
+    throw new Error(`Config validation error: ${error.message}`);
+  }
+
+  return config;
+};
 
 export type Config = ReturnType<typeof loadConfig>;

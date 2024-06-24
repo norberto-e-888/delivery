@@ -1,5 +1,6 @@
 import { Global, Module, Provider } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import Joi from 'joi';
 import { createClient } from 'redis';
 
 export const REDIS_PROVIDER_KEY = Symbol('REDIS_PROVIDER_KEY');
@@ -33,6 +34,14 @@ export const redisProvider: Provider = {
   exports: [redisProvider],
 })
 export class AppRedisModule {}
+
+export const redisConfigJoiSchema = Joi.object({
+  redis: Joi.object({
+    url: Joi.string().required(),
+    username: Joi.string().required(),
+    password: Joi.string().required(),
+  }).required(),
+});
 
 export type RedisConfig = {
   redis: { url: string; username: string; password: string };

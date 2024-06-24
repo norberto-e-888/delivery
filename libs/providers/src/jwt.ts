@@ -1,6 +1,7 @@
 import { Global, Module } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
+import Joi from 'joi';
 
 @Global()
 @Module({
@@ -25,6 +26,12 @@ import { JwtModule } from '@nestjs/jwt';
   exports: [JwtModule],
 })
 export class AppJwtModule {}
+
+export const jwtConfigJoiSchema = Joi.object({
+  jwt: Joi.object({
+    secret: Joi.string().required().length(64),
+  }).required(),
+});
 
 export type JwtConfig = {
   jwt: { secret: string };
