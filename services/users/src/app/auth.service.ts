@@ -111,69 +111,63 @@ export class AuthService {
     user: User,
     refreshToken: string
   ): Promise<void> {
-    const sessionKeys = await this.redis.keys(`refresh-token:${user.id}:*`);
+    const hashedRefreshTokens = await this.redis.zRange(
+      `refresh-tokens:${user.id}`,
+      0,
+      -1
+    );
 
-    for (const sessionKey of sessionKeys) {
-      const hashedRefreshToken = await this.redis.get(sessionKey);
-      const isTokenValid =
-        hashedRefreshToken &&
-        (await bcrypt.compare(refreshToken, hashedRefreshToken));
+    for (const token of hashedRefreshTokens) {
+      const isTokenValid = await bcrypt.compare(refreshToken, token);
 
       if (isTokenValid) {
-        await this.redis.del(sessionKey);
+        await this.redis.zRem(`refresh-tokens:${user.id}`, token);
         return;
       }
     }
   }
 
   async signOutFromAllDevices(user: User): Promise<void> {
-    const sessionKeys = await this.redis.keys(`refresh-token:${user.id}:*`);
-    const multi = this.redis.multi();
-
-    for (const sessionKey of sessionKeys) {
-      multi.del(sessionKey);
-    }
-
-    await multi.exec();
+    await this.redis.del(`refresh-tokens:${user.id}`);
   }
 
   async refreshTokens(user: User, refreshToken: string): Promise<Tokens> {
-    const sessionKeys = await this.redis.keys(`refresh-token:${user.id}:*`);
+    const hashedRefreshTokens = await this.redis.zRange(
+      `refresh-tokens:${user.id}`,
+      0,
+      -1
+    );
 
-    for (const sessionKey of sessionKeys) {
-      const hashedRefreshToken = await this.redis.get(sessionKey);
-      const isTokenValid =
-        hashedRefreshToken &&
-        (await bcrypt.compare(refreshToken, hashedRefreshToken));
+    for (const token of hashedRefreshTokens) {
+      const isTokenValid = token && (await bcrypt.compare(refreshToken, token));
 
       if (isTokenValid) {
-        const sessionId = sessionKey.split(':').pop();
-        return this.generateTokens(user, sessionId);
+        return this.generateTokens(user, token);
       }
     }
 
-    const multi = this.redis.multi();
+    /**
+     * If we made it here, it means the same refresh token was used more than once, which never happens for legitimate users.
+     */
 
-    for (const sessionKey of sessionKeys) {
-      multi.del(sessionKey);
-    }
+    await this.signOutFromAllDevices(user);
 
     const { accessTokenDuration } =
       this.configService.get<Config['jwt']>('jwt');
 
-    multi.set(`compromised-user:${user.id}`, 1, {
+    this.redis.set(`compromised-user:${user.id}`, 1, {
       EX: accessTokenDuration,
     });
-
-    await multi.exec();
   }
 
   private async generateTokens(
     user: User,
-    currentSessionId?: string
+    currentSessionHashedToken?: string
   ): Promise<Tokens> {
-    const { accessTokenDuration, refreshTokenDuration } =
+    const { accessTokenDuration } =
       this.configService.get<Config['jwt']>('jwt');
+
+    const maxSessions = this.configService.get<number>('maxSessions');
 
     const payload: AccessTokenPayload = {
       id: user.id,
@@ -185,20 +179,27 @@ export class AuthService {
     });
 
     const refreshToken = uuid();
-    const randomSessionId = uuid();
-    const hashedRefreshToken = await bcrypt.hash(refreshToken, 10);
+    const token = await bcrypt.hash(refreshToken, 10);
+
+    await this.redis.watch(`refresh-tokens:${user.id}`);
+
     const multi = this.redis.multi();
 
-    multi.set(
-      `refresh-token:${user.id}:${randomSessionId}`,
-      hashedRefreshToken,
-      {
-        EX: refreshTokenDuration,
-      }
+    multi.zAdd(`refresh-tokens:${user.id}`, {
+      score: Date.now(),
+      value: token,
+    });
+
+    if (currentSessionHashedToken) {
+      multi.zRem(`refresh-tokens:${user.id}`, currentSessionHashedToken);
+    }
+
+    const numberOfSessions = await this.redis.zCard(
+      `refresh-tokens:${user.id}`
     );
 
-    if (currentSessionId) {
-      multi.del(`refresh-token:${user.id}:${currentSessionId}`);
+    if (numberOfSessions === maxSessions) {
+      multi.zPopMin(`refresh-tokens:${user.id}`);
     }
 
     await multi.exec();

@@ -37,6 +37,7 @@ export const loadConfig = () => {
     misc: {
       port: +process.env.PORT,
     },
+    maxSessions: +process.env.MAX_SESSIONS,
   };
 
   const validationSchema = Joi.any()
@@ -45,7 +46,12 @@ export const loadConfig = () => {
     .concat(redisConfigJoiSchema)
     .concat(rmqConfigJoiSchema)
     .concat(sendgridConfigJoiSchema)
-    .concat(commonConfigJoiSchema);
+    .concat(commonConfigJoiSchema)
+    .concat(
+      Joi.object<ServiceConfig>({
+        maxSessions: Joi.number().integer().min(1).required(),
+      })
+    );
 
   const { error } = validationSchema.validate(config, {
     abortEarly: false,
@@ -58,9 +64,14 @@ export const loadConfig = () => {
   return config;
 };
 
+type ServiceConfig = {
+  maxSessions: number;
+};
+
 export type Config = JwtConfig &
   MongoConfig &
   RedisConfig &
   RMQConfig &
   SendgridConfig &
-  CommonConfig;
+  CommonConfig &
+  ServiceConfig;

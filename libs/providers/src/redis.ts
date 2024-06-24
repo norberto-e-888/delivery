@@ -48,3 +48,5 @@ export type RedisConfig = {
 };
 
 export type RedisProviderType = ReturnType<typeof createClient>;
+
+export type RedisMulti = ReturnType<RedisProviderType['multi']>;
