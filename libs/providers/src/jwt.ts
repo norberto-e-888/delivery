@@ -55,13 +55,13 @@ export class JwtAuthGuard implements CanActivate {
         ignoreExpiration: isRefreshEndpoint,
       });
 
-      const isUserCompromised = await this.redis.get(
-        `compromised-users:${payload.id}`
+      const expiryOverride = await this.redis.get(
+        `consider-all-tokens-expired:${payload.id}`
       );
 
-      if (isUserCompromised) {
+      if (expiryOverride) {
         throw new HttpException(
-          'User is compromised. Please try to sign in later',
+          'Invalid access token',
           HttpStatus.UNAUTHORIZED
         );
       }

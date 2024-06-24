@@ -135,12 +135,9 @@ export class AuthService {
     await this.redis.del(`refresh-tokens:${userId}`);
   }
 
-  async refreshTokens(
-    atp: AccessTokenPayload,
-    refreshToken: string
-  ): Promise<Tokens> {
+  async refreshTokens(userId: string, refreshToken: string): Promise<Tokens> {
     const hashedRefreshTokens = await this.redis.zRange(
-      `refresh-tokens:${atp.id}`,
+      `refresh-tokens:${userId}`,
       0,
       -1
     );
@@ -149,7 +146,15 @@ export class AuthService {
       const isTokenValid = token && (await bcrypt.compare(refreshToken, token));
 
       if (isTokenValid) {
-        return this.generateTokens(atp, token);
+        const user = await this.findUserById(userId);
+
+        return this.generateTokens(
+          {
+            id: user.id,
+            roles: user.roles,
+          },
+          token
+        );
       }
     }
 
@@ -157,12 +162,12 @@ export class AuthService {
      * If we made it here, it means the same refresh token was used more than once, which never happens for legitimate users.
      */
 
-    await this.signOutFromAllDevices(atp.id);
+    await this.signOutFromAllDevices(userId);
 
     const { accessTokenDuration } =
       this.configService.get<Config['jwt']>('jwt');
 
-    this.redis.set(`compromised-users:${atp.id}`, 1, {
+    this.redis.set(`consider-all-tokens-expired:${userId}`, 1, {
       EX: accessTokenDuration,
     });
   }

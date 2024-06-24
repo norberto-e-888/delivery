@@ -77,7 +77,7 @@ export class AuthController {
     @Cookie(JwtCookie.RefreshToken) refreshToken: string
   ) {
     const { accessToken, refreshToken: newRefreshToken } =
-      await this.authService.refreshTokens(atp, refreshToken);
+      await this.authService.refreshTokens(atp.id, refreshToken);
 
     res.cookie(JwtCookie.AccessToken, accessToken, COOKIE_OPTIONS);
     res.cookie(JwtCookie.RefreshToken, newRefreshToken, COOKIE_OPTIONS);
