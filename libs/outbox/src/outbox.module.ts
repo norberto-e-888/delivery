@@ -14,4 +14,4 @@ import { OutboxPublisherHandler } from './publish.command';
   providers: [OutboxPublisherHandler, OutboxService],
   exports: [OutboxService],
 })
-export class OutboxPublisherModule {}
+export class AppOutboxModule {}

@@ -5,7 +5,7 @@ export type UsersEventSignUpPayload = {
   user: Omit<User, 'password'>;
 };
 
-export const userEventSignUpRoutingKeyGenerators: RoutingKeyGenerators = {
+export const usersEventSignUpRoutingKeyGenerators: RoutingKeyGenerators = {
   producer: () => '',
   consumer: () => '',
 };

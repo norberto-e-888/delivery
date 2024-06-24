@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { AppOutboxModule } from '@delivery/outbox';
 import {
   AppJwtModule,
   AppMongoModule,
@@ -7,6 +8,7 @@ import {
   AppRedisModule,
   AppSendgridModule,
 } from '@delivery/providers';
+import { UsersTopic } from '@delivery/api';
 
 import { loadConfig } from '../config';
 import { AuthModule } from './auth/auth.module';
@@ -17,10 +19,11 @@ import { AuthModule } from './auth/auth.module';
       isGlobal: true,
       load: [loadConfig],
     }),
+    AppRabbitMQModule.forRoot(Object.values(UsersTopic)),
+    AppOutboxModule,
     AppJwtModule,
     AppMongoModule,
     AppRedisModule,
-    AppRabbitMQModule.forRoot([]),
     AppSendgridModule,
     AuthModule,
   ],

@@ -1,7 +1,8 @@
 import { RabbitMQModule } from '@golevelup/nestjs-rabbitmq';
-import { DynamicModule, Module } from '@nestjs/common';
+import { DynamicModule, Global, Module } from '@nestjs/common';
 import Joi from 'joi';
 
+@Global()
 @Module({})
 export class AppRabbitMQModule {
   static forRoot(topics: string[]): DynamicModule {

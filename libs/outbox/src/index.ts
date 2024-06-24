@@ -1,2 +1,2 @@
-export { OutboxPublisherModule } from './outbox.module';
+export { AppOutboxModule } from './outbox.module';
 export { OutboxService } from './outbox.service';

@@ -1,7 +1,13 @@
 import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { InjectModel } from '@nestjs/mongoose';
-import { UsersSignInBody, UsersSignUpBody } from '@delivery/api';
+import {
+  UsersEventSignUpPayload,
+  UsersSignInBody,
+  UsersSignUpBody,
+  UsersTopic,
+  usersEventSignUpRoutingKeyGenerators,
+} from '@delivery/api';
 import { User, UserRole } from '@delivery/models';
 
 import { Model } from 'mongoose';
@@ -9,6 +15,7 @@ import * as bcrypt from 'bcryptjs';
 import { REDIS_PROVIDER_KEY, RedisProvierType } from '@delivery/providers';
 import { ConfigService } from '@nestjs/config';
 import { Config } from '../../config';
+import { OutboxService } from '@delivery/outbox';
 
 @Injectable()
 export class AuthService {
@@ -18,31 +25,53 @@ export class AuthService {
     @Inject(REDIS_PROVIDER_KEY)
     private readonly redis: RedisProvierType,
     private readonly jwtService: JwtService,
-    private readonly configService: ConfigService<Config>
+    private readonly configService: ConfigService<Config>,
+    private readonly outboxService: OutboxService
   ) {}
 
   async signUp(dto: UsersSignUpBody): Promise<AuthenticatedResponse> {
-    const existingUser = await this.userModel.findOne({
-      email: dto.email,
-    });
+    const newUser = await this.outboxService.publish(
+      async (session) => {
+        const existingUser = await this.userModel.findOne({
+          email: dto.email,
+        });
 
-    if (existingUser) {
-      throw new HttpException('User already exists', HttpStatus.BAD_REQUEST);
-    }
+        if (existingUser) {
+          throw new HttpException(
+            'User already exists',
+            HttpStatus.BAD_REQUEST
+          );
+        }
 
-    const hashedPassword = await bcrypt.hash(dto.password, 10);
-    const newUser = await this.userModel.create({
-      firstName: dto.firstName,
-      lastName: dto.lastName,
-      email: dto.email,
-      password: hashedPassword,
-    });
+        const hashedPassword = await bcrypt.hash(dto.password, 10);
+        const [newUser] = await this.userModel.create(
+          {
+            firstName: dto.firstName,
+            lastName: dto.lastName,
+            email: dto.email,
+            password: hashedPassword,
+          },
+          {
+            session,
+          }
+        );
 
-    const newUserObj = newUser.toObject();
+        return newUser.toObject();
+      },
+      {
+        exchange: UsersTopic.SignUp,
+        routingKey: usersEventSignUpRoutingKeyGenerators.producer(),
+      },
+      {
+        transformPayload: (user): UsersEventSignUpPayload => ({
+          user,
+        }),
+      }
+    );
 
     return {
-      user: newUserObj,
-      tokens: await this.generateTokens(newUserObj),
+      user: newUser,
+      tokens: await this.generateTokens(newUser),
     };
   }
 
