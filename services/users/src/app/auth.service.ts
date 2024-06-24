@@ -107,24 +107,71 @@ export class AuthService {
     };
   }
 
-  async signOut(user: User): Promise<void> {
-    await this.redis.del(`refresh-token:${user.id}`);
+  async signOutFromSingleDevice(
+    user: User,
+    refreshToken: string
+  ): Promise<void> {
+    const sessionKeys = await this.redis.keys(`refresh-token:${user.id}:*`);
+
+    for (const sessionKey of sessionKeys) {
+      const hashedRefreshToken = await this.redis.get(sessionKey);
+      const isTokenValid =
+        hashedRefreshToken &&
+        (await bcrypt.compare(refreshToken, hashedRefreshToken));
+
+      if (isTokenValid) {
+        await this.redis.del(sessionKey);
+        return;
+      }
+    }
+  }
+
+  async signOutFromAllDevices(user: User): Promise<void> {
+    const sessionKeys = await this.redis.keys(`refresh-token:${user.id}:*`);
+    const multi = this.redis.multi();
+
+    for (const sessionKey of sessionKeys) {
+      multi.del(sessionKey);
+    }
+
+    await multi.exec();
   }
 
   async refreshTokens(user: User, refreshToken: string): Promise<Tokens> {
-    const hashedRefreshToken = await this.redis.get(`refresh-token:${user.id}`);
-    const isTokenValid =
-      hashedRefreshToken &&
-      (await bcrypt.compare(refreshToken, hashedRefreshToken));
+    const sessionKeys = await this.redis.keys(`refresh-token:${user.id}:*`);
 
-    if (!isTokenValid) {
-      throw new HttpException('Invalid refresh token', HttpStatus.UNAUTHORIZED);
+    for (const sessionKey of sessionKeys) {
+      const hashedRefreshToken = await this.redis.get(sessionKey);
+      const isTokenValid =
+        hashedRefreshToken &&
+        (await bcrypt.compare(refreshToken, hashedRefreshToken));
+
+      if (isTokenValid) {
+        const sessionId = sessionKey.split(':').pop();
+        return this.generateTokens(user, sessionId);
+      }
     }
 
-    return this.generateTokens(user);
+    const multi = this.redis.multi();
+
+    for (const sessionKey of sessionKeys) {
+      multi.del(sessionKey);
+    }
+
+    const { accessTokenDuration } =
+      this.configService.get<Config['jwt']>('jwt');
+
+    multi.set(`compromised-user:${user.id}`, 1, {
+      EX: accessTokenDuration,
+    });
+
+    await multi.exec();
   }
 
-  private async generateTokens(user: User): Promise<Tokens> {
+  private async generateTokens(
+    user: User,
+    currentSessionId?: string
+  ): Promise<Tokens> {
     const { accessTokenDuration, refreshTokenDuration } =
       this.configService.get<Config['jwt']>('jwt');
 
@@ -138,11 +185,23 @@ export class AuthService {
     });
 
     const refreshToken = uuid();
+    const randomSessionId = uuid();
     const hashedRefreshToken = await bcrypt.hash(refreshToken, 10);
+    const multi = this.redis.multi();
 
-    await this.redis.set(`refresh-token:${user.id}`, hashedRefreshToken, {
-      EX: refreshTokenDuration,
-    });
+    multi.set(
+      `refresh-token:${user.id}:${randomSessionId}`,
+      hashedRefreshToken,
+      {
+        EX: refreshTokenDuration,
+      }
+    );
+
+    if (currentSessionId) {
+      multi.del(`refresh-token:${user.id}:${currentSessionId}`);
+    }
+
+    await multi.exec();
 
     return {
       accessToken,
