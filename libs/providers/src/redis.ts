@@ -1,4 +1,4 @@
-import { Module, Provider } from '@nestjs/common';
+import { Global, Module, Provider } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { createClient } from 'redis';
 
@@ -27,6 +27,7 @@ export const redisProvider: Provider = {
   },
 };
 
+@Global()
 @Module({
   providers: [redisProvider],
   exports: [redisProvider],
@@ -36,3 +37,5 @@ export class AppRedisModule {}
 export type RedisConfig = {
   redis: { url: string; username: string; password: string };
 };
+
+export type RedisProvierType = ReturnType<typeof createClient>;
