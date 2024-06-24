@@ -29,8 +29,8 @@ import Joi from 'joi';
 })
 export class AppMongoModule {}
 
-export const mongoConfigJoiSchema = Joi.object({
-  mongo: Joi.object({
+export const mongoConfigJoiSchema = Joi.object<MongoConfig>({
+  mongo: Joi.object<MongoConfig['mongo']>({
     uri: Joi.string().required(),
   }).required(),
 });

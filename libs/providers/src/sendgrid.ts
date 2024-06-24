@@ -31,8 +31,8 @@ export const sendgridProvider: Provider = {
 })
 export class AppSendgridModule {}
 
-export const sendgridConfigJoiSchema = Joi.object({
-  sendgrid: Joi.object({
+export const sendgridConfigJoiSchema = Joi.object<SendgridConfig>({
+  sendgrid: Joi.object<SendgridConfig['sendgrid']>({
     apiKey: Joi.string().required(),
   }).required(),
 });

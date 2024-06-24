@@ -35,8 +35,8 @@ export const redisProvider: Provider = {
 })
 export class AppRedisModule {}
 
-export const redisConfigJoiSchema = Joi.object({
-  redis: Joi.object({
+export const redisConfigJoiSchema = Joi.object<RedisConfig>({
+  redis: Joi.object<RedisConfig['redis']>({
     url: Joi.string().required(),
     username: Joi.string().required(),
     password: Joi.string().required(),

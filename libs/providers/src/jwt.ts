@@ -27,8 +27,8 @@ import Joi from 'joi';
 })
 export class AppJwtModule {}
 
-export const jwtConfigJoiSchema = Joi.object({
-  jwt: Joi.object({
+export const jwtConfigJoiSchema = Joi.object<JwtConfig>({
+  jwt: Joi.object<JwtConfig['jwt']>({
     secret: Joi.string().required().length(64),
   }).required(),
 });

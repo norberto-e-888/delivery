@@ -8,11 +8,11 @@ import {
   redisConfigJoiSchema,
   sendgridConfigJoiSchema,
 } from '@delivery/providers';
-import { CommonConfig, commonConfigJoiSchema } from '@delivery/misc';
+import { CommonConfig, commonConfigJoiSchema } from '@delivery/utils';
 import Joi from 'joi';
 
 export const loadConfig = () => {
-  const config = {
+  const config: Config = {
     jwt: {
       secret: process.env.JWT_SECRET,
     },
@@ -30,7 +30,7 @@ export const loadConfig = () => {
     misc: {
       port: +process.env.PORT,
     },
-  } as JwtConfig & MongoConfig & RedisConfig & SendgridConfig & CommonConfig;
+  };
 
   const validationSchema = Joi.any()
     .concat(jwtConfigJoiSchema)
@@ -50,4 +50,8 @@ export const loadConfig = () => {
   return config;
 };
 
-export type Config = ReturnType<typeof loadConfig>;
+export type Config = JwtConfig &
+  MongoConfig &
+  RedisConfig &
+  SendgridConfig &
+  CommonConfig;
