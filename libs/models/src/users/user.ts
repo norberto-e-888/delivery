@@ -10,11 +10,12 @@ import { HydratedDocument } from 'mongoose';
 export const USERS_COLLECTION = 'users';
 
 export enum UserRole {
-  ADMIN = 'admin',
+  CLERK = 'clerk',
   DINER = 'diner',
   DRIVER = 'driver',
   RESTAURANT_OWNER = 'restaurant_owner',
   RESTAURANT_ADMIN = 'restaurant_admin',
+  ROOT = 'root',
 }
 
 @Schema(
