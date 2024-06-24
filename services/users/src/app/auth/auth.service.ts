@@ -1,6 +1,7 @@
 import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { InjectModel } from '@nestjs/mongoose';
+import { ConfigService } from '@nestjs/config';
 import {
   UsersEventSignUpPayload,
   UsersSignInBody,
@@ -9,13 +10,13 @@ import {
   usersEventSignUpRoutingKeyGenerators,
 } from '@delivery/api';
 import { USERS_COLLECTION, User, UserRole } from '@delivery/models';
+import { OutboxService } from '@delivery/outbox';
+import { REDIS_PROVIDER_KEY, RedisProvierType } from '@delivery/providers';
 
 import { Model } from 'mongoose';
 import * as bcrypt from 'bcryptjs';
-import { REDIS_PROVIDER_KEY, RedisProvierType } from '@delivery/providers';
-import { ConfigService } from '@nestjs/config';
+
 import { Config } from '../../config';
-import { OutboxService } from '@delivery/outbox';
 
 @Injectable()
 export class AuthService {
