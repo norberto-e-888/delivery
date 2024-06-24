@@ -123,12 +123,15 @@ export class AuthService {
 
   async signOutFromAllDevices(user: User): Promise<void> {
     const keys = await this.redis.keys(`refresh-token:${user.id}:*`);
-    const multi = this.redis.multi();
-    for (const key of keys) {
-      multi.del(key);
-    }
 
-    await multi.exec();
+    if (keys.length) {
+      const multi = this.redis.multi();
+      for (const key of keys) {
+        multi.del(key);
+      }
+
+      await multi.exec();
+    }
   }
 
   async refreshTokens(user: User, refreshToken: string): Promise<Tokens> {
