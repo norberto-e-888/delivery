@@ -49,7 +49,7 @@ export class AuthService {
           );
         }
 
-        const hashedPassword = await bcrypt.hash(dto.password, 10);
+        const hashedPassword = await bcrypt.hash(dto.password, 12);
         const [newUser] = await this.userModel.create(
           {
             firstName: dto.firstName,
@@ -183,7 +183,7 @@ export class AuthService {
     });
 
     const refreshToken = uuid();
-    const token = await bcrypt.hash(refreshToken, 10);
+    const token = await bcrypt.hash(refreshToken, 12);
 
     await this.redis.watch(`refresh-tokens:${user.id}`);
 
