@@ -15,6 +15,7 @@ import { REDIS_PROVIDER_KEY, RedisProviderType } from '@delivery/providers';
 
 import { Model } from 'mongoose';
 import * as bcrypt from 'bcryptjs';
+import { v4 as uuid } from 'uuid';
 
 import { Config } from '../config';
 
@@ -164,7 +165,7 @@ export class AuthService {
     };
 
     const accessToken = this.jwtService.sign(payload, { expiresIn: '10m' });
-    const refreshToken = this.jwtService.sign(payload, { expiresIn: '90d' });
+    const refreshToken = uuid();
     const { refreshTokenSecret } =
       this.configService.get<Config['auth']>('auth');
 
@@ -192,4 +193,9 @@ export type AuthenticatedResponse = {
 export type Tokens = {
   accessToken: string;
   refreshToken: string;
+};
+
+export type AccessTokenPayload = {
+  id: string;
+  roles: UserRole[];
 };
