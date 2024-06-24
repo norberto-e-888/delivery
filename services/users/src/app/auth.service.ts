@@ -211,9 +211,11 @@ export class AuthService {
       multi.zRem(`refresh-tokens:${atp.id}`, currentSessionHashedToken);
     }
 
-    const numberOfSessions = await this.redis.zCard(`refresh-tokens:${atp.id}`);
+    const numberOfSessions =
+      (await this.redis.zCard(`refresh-tokens:${atp.id}`)) +
+      (currentSessionHashedToken ? 0 : 1);
 
-    if (numberOfSessions === maxSessions) {
+    if (numberOfSessions > maxSessions) {
       multi.zPopMin(`refresh-tokens:${atp.id}`);
     }
 
