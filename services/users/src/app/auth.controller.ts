@@ -15,7 +15,7 @@ const COOKIE_OPTIONS: CookieOptions = {
   httpOnly: true,
   sameSite: 'strict',
   secure: process.env.NODE_ENV === 'production',
-  maxAge: +process.env.AUTH_JWT_ACCESS_TOKEN_DURATION * 1000,
+  maxAge: +process.env.AUTH_JWT_REFRESH_TOKEN_DURATION * 1000,
 };
 
 @Controller('auth')
