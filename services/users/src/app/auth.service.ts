@@ -159,7 +159,7 @@ export class AuthService {
     const { accessTokenDuration } =
       this.configService.get<Config['jwt']>('jwt');
 
-    this.redis.set(`compromised-user:${user.id}`, 1, {
+    this.redis.set(`compromised-users:${user.id}`, 1, {
       EX: accessTokenDuration,
     });
   }

@@ -6,6 +6,7 @@ import {
   ExecutionContext,
   HttpException,
   HttpStatus,
+  Inject,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtModule, JwtService } from '@nestjs/jwt';
@@ -15,12 +16,15 @@ import { UserRole } from '@delivery/models';
 import Joi from 'joi';
 import { Request } from 'express';
 import { Reflector } from '@nestjs/core';
+import { AppRedisModule, REDIS_PROVIDER_KEY, RedisProviderType } from './redis';
 
 @Injectable()
 export class JwtAuthGuard implements CanActivate {
   constructor(
     private readonly reflector: Reflector,
-    private readonly jwtService: JwtService
+    private readonly jwtService: JwtService,
+    @Inject(REDIS_PROVIDER_KEY)
+    private readonly redis: RedisProviderType
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -49,6 +53,17 @@ export class JwtAuthGuard implements CanActivate {
       const payload = this.jwtService.verify<AccessTokenPayload>(accessToken, {
         ignoreExpiration: isRefreshEndpoint,
       });
+
+      const isUserCompromised = await this.redis.get(
+        `compromised-users:${payload.id}`
+      );
+
+      if (isUserCompromised) {
+        throw new HttpException(
+          'User is compromised. Please try to sign in later',
+          HttpStatus.UNAUTHORIZED
+        );
+      }
 
       const roles = this.reflector.get(Roles, context.getHandler());
 
@@ -87,6 +102,7 @@ export class JwtAuthGuard implements CanActivate {
         };
       },
     }),
+    AppRedisModule,
   ],
   exports: [JwtModule],
 })
