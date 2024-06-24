@@ -19,8 +19,8 @@ export enum UserRole {
 }
 
 @Schema(
-  genSchemaOptions(USERS_COLLECTION, {
-    omitFromTransform: [],
+  genSchemaOptions<User>(USERS_COLLECTION, {
+    omitFromTransform: ['password'],
   })
 )
 export class User extends BaseModel {
