@@ -112,11 +112,11 @@ export class AuthService {
   }
 
   async signOutFromSingleDevice(
-    user: User,
+    userId: string,
     refreshToken: string
   ): Promise<void> {
     const hashedRefreshTokens = await this.redis.zRange(
-      `refresh-tokens:${user.id}`,
+      `refresh-tokens:${userId}`,
       0,
       -1
     );
@@ -125,19 +125,22 @@ export class AuthService {
       const isTokenValid = await bcrypt.compare(refreshToken, token);
 
       if (isTokenValid) {
-        await this.redis.zRem(`refresh-tokens:${user.id}`, token);
+        await this.redis.zRem(`refresh-tokens:${userId}`, token);
         return;
       }
     }
   }
 
-  async signOutFromAllDevices(user: User): Promise<void> {
-    await this.redis.del(`refresh-tokens:${user.id}`);
+  async signOutFromAllDevices(userId: string): Promise<void> {
+    await this.redis.del(`refresh-tokens:${userId}`);
   }
 
-  async refreshTokens(user: User, refreshToken: string): Promise<Tokens> {
+  async refreshTokens(
+    atp: AccessTokenPayload,
+    refreshToken: string
+  ): Promise<Tokens> {
     const hashedRefreshTokens = await this.redis.zRange(
-      `refresh-tokens:${user.id}`,
+      `refresh-tokens:${atp.id}`,
       0,
       -1
     );
@@ -146,7 +149,7 @@ export class AuthService {
       const isTokenValid = token && (await bcrypt.compare(refreshToken, token));
 
       if (isTokenValid) {
-        return this.generateTokens(user, token);
+        return this.generateTokens(atp, token);
       }
     }
 
@@ -154,18 +157,28 @@ export class AuthService {
      * If we made it here, it means the same refresh token was used more than once, which never happens for legitimate users.
      */
 
-    await this.signOutFromAllDevices(user);
+    await this.signOutFromAllDevices(atp.id);
 
     const { accessTokenDuration } =
       this.configService.get<Config['jwt']>('jwt');
 
-    this.redis.set(`compromised-users:${user.id}`, 1, {
+    this.redis.set(`compromised-users:${atp.id}`, 1, {
       EX: accessTokenDuration,
     });
   }
 
+  async findUserById(id: string): Promise<User> {
+    const user = await this.userModel.findById(id);
+
+    if (!user) {
+      throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+    }
+
+    return user;
+  }
+
   private async generateTokens(
-    user: User,
+    atp: AccessTokenPayload,
     currentSessionHashedToken?: string
   ): Promise<Tokens> {
     const { accessTokenDuration } =
@@ -173,37 +186,30 @@ export class AuthService {
 
     const maxSessions = this.configService.get<number>('maxSessions');
 
-    const payload: AccessTokenPayload = {
-      id: user.id,
-      roles: user.roles,
-    };
-
-    const accessToken = this.jwtService.sign(payload, {
+    const accessToken = this.jwtService.sign(atp, {
       expiresIn: accessTokenDuration,
     });
 
     const refreshToken = uuid();
     const token = await bcrypt.hash(refreshToken, 12);
 
-    await this.redis.watch(`refresh-tokens:${user.id}`);
+    await this.redis.watch(`refresh-tokens:${atp.id}`);
 
     const multi = this.redis.multi();
 
-    multi.zAdd(`refresh-tokens:${user.id}`, {
+    multi.zAdd(`refresh-tokens:${atp.id}`, {
       score: Date.now(),
       value: token,
     });
 
     if (currentSessionHashedToken) {
-      multi.zRem(`refresh-tokens:${user.id}`, currentSessionHashedToken);
+      multi.zRem(`refresh-tokens:${atp.id}`, currentSessionHashedToken);
     }
 
-    const numberOfSessions = await this.redis.zCard(
-      `refresh-tokens:${user.id}`
-    );
+    const numberOfSessions = await this.redis.zCard(`refresh-tokens:${atp.id}`);
 
     if (numberOfSessions === maxSessions) {
-      multi.zPopMin(`refresh-tokens:${user.id}`);
+      multi.zPopMin(`refresh-tokens:${atp.id}`);
     }
 
     await multi.exec();

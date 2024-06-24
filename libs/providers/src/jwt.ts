@@ -7,6 +7,7 @@ import {
   HttpException,
   HttpStatus,
   Inject,
+  createParamDecorator,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtModule, JwtService } from '@nestjs/jwt';
@@ -109,6 +110,13 @@ export class JwtAuthGuard implements CanActivate {
 export class AppJwtModule {}
 
 export const Roles = Reflector.createDecorator<UserRole[]>();
+
+export const AccessTokenPayload = createParamDecorator(
+  (_: unknown, ctx: ExecutionContext) => {
+    const request = ctx.switchToHttp().getRequest<AppRequest>();
+    return request.user;
+  }
+);
 
 export const jwtConfigJoiSchema = Joi.object<JwtConfig>({
   jwt: Joi.object<JwtConfig['jwt']>({
