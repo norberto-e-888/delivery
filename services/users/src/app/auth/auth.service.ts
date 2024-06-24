@@ -1,7 +1,7 @@
 import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { InjectModel } from '@nestjs/mongoose';
-import { SignInBody, SignUpBody } from '@delivery/api';
+import { UsersSignInBody, UsersSignUpBody } from '@delivery/api';
 import { User, UserRole } from '@delivery/models';
 
 import { Model } from 'mongoose';
@@ -21,7 +21,7 @@ export class AuthService {
     private readonly configService: ConfigService<Config>
   ) {}
 
-  async signUp(dto: SignUpBody): Promise<AuthenticatedResponse> {
+  async signUp(dto: UsersSignUpBody): Promise<AuthenticatedResponse> {
     const existingUser = await this.userModel.findOne({
       email: dto.email,
     });
@@ -46,7 +46,7 @@ export class AuthService {
     };
   }
 
-  async signIn(dto: SignInBody): Promise<AuthenticatedResponse> {
+  async signIn(dto: UsersSignInBody): Promise<AuthenticatedResponse> {
     const existingUser = await this.userModel.findOne({
       email: dto.email,
     });

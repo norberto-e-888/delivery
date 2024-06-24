@@ -3,6 +3,7 @@ import { ConfigModule } from '@nestjs/config';
 import {
   AppJwtModule,
   AppMongoModule,
+  AppRabbitMQModule,
   AppRedisModule,
   AppSendgridModule,
 } from '@delivery/providers';
@@ -19,6 +20,7 @@ import { AuthModule } from './auth/auth.module';
     AppJwtModule,
     AppMongoModule,
     AppRedisModule,
+    AppRabbitMQModule.forRoot([]),
     AppSendgridModule,
     AuthModule,
   ],

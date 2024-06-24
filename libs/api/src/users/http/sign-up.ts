@@ -1,6 +1,12 @@
 import { IsEmail, IsString } from 'class-validator';
 
-export class SignInBody {
+export class UsersSignUpBody {
+  @IsString()
+  firstName!: string;
+
+  @IsString()
+  lastName!: string;
+
   @IsString()
   @IsEmail()
   email!: string;

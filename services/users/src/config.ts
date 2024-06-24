@@ -1,11 +1,13 @@
 import {
   AuthConfig,
   MongoConfig,
+  RMQConfig,
   RedisConfig,
   SendgridConfig,
   authConfigJoiSchema,
   mongoConfigJoiSchema,
   redisConfigJoiSchema,
+  rmqConfigJoiSchema,
   sendgridConfigJoiSchema,
 } from '@delivery/providers';
 import { CommonConfig, commonConfigJoiSchema } from '@delivery/utils';
@@ -25,6 +27,9 @@ export const loadConfig = () => {
       username: process.env.REDIS_USER,
       password: process.env.REDIS_PASSWORD,
     },
+    rmq: {
+      uri: process.env.RMQ_URI,
+    },
     sendgrid: {
       apiKey: process.env.SENDGRID_API_KEY,
     },
@@ -37,6 +42,7 @@ export const loadConfig = () => {
     .concat(authConfigJoiSchema)
     .concat(mongoConfigJoiSchema)
     .concat(redisConfigJoiSchema)
+    .concat(rmqConfigJoiSchema)
     .concat(sendgridConfigJoiSchema)
     .concat(commonConfigJoiSchema);
 
@@ -54,5 +60,6 @@ export const loadConfig = () => {
 export type Config = AuthConfig &
   MongoConfig &
   RedisConfig &
+  RMQConfig &
   SendgridConfig &
   CommonConfig;
