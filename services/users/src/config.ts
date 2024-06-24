@@ -1,4 +1,4 @@
-export const config = () => ({
+export const loadConfig = () => ({
   jwt: {
     secret: process.env.JWT_SECRET,
   },
@@ -7,7 +7,7 @@ export const config = () => ({
   },
   redis: {
     url: process.env.REDIS_URL,
-    user: process.env.REDIS_USER,
+    username: process.env.REDIS_USER,
     password: process.env.REDIS_PASSWORD,
   },
   sendgrid: {
@@ -22,4 +22,4 @@ export const config = () => ({
   },
 });
 
-export type Config = ReturnType<typeof config>;
+export type Config = ReturnType<typeof loadConfig>;
