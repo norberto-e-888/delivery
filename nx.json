@@ -1,10 +1,7 @@
 {
   "$schema": "./node_modules/nx/schemas/nx-schema.json",
   "namedInputs": {
-    "default": [
-      "{projectRoot}/**/*",
-      "sharedGlobals"
-    ],
+    "default": ["{projectRoot}/**/*", "sharedGlobals"],
     "production": [
       "default",
       "!{projectRoot}/.eslintrc.json",
@@ -46,7 +43,8 @@
         "services/payments-e2e/**/*",
         "services/order-assignment-e2e/**/*",
         "services/users-e2e/**/*",
-        "services/users-e2e/**/*"
+        "services/users-e2e/**/*",
+        "services/delivery-e2e/**/*"
       ]
     }
   ]

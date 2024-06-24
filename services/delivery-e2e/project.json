@@ -1,17 +1,17 @@
 {
-  "name": "service-fulfillment-e2e",
+  "name": "service-delivery-e2e",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "projectType": "application",
-  "implicitDependencies": ["service-fulfillment"],
+  "implicitDependencies": ["service-delivery"],
   "targets": {
     "e2e": {
       "executor": "@nx/jest:jest",
       "outputs": ["{workspaceRoot}/coverage/{e2eProjectRoot}"],
       "options": {
-        "jestConfig": "services/fulfillment-e2e/jest.config.ts",
+        "jestConfig": "services/delivery-e2e/jest.config.ts",
         "passWithNoTests": true
       },
-      "dependsOn": ["service-fulfillment:build"]
+      "dependsOn": ["service-delivery:build"]
     }
   }
 }

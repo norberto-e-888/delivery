@@ -1,7 +1,7 @@
 {
-  "name": "service-fulfillment",
+  "name": "service-delivery",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
-  "sourceRoot": "services/fulfillment/src",
+  "sourceRoot": "services/delivery/src",
   "projectType": "application",
   "tags": [],
   "targets": {
@@ -9,14 +9,14 @@
       "executor": "@nx/js:node",
       "defaultConfiguration": "development",
       "options": {
-        "buildTarget": "service-fulfillment:build"
+        "buildTarget": "service-delivery:build"
       },
       "configurations": {
         "development": {
-          "buildTarget": "service-fulfillment:build:development"
+          "buildTarget": "service-delivery:build:development"
         },
         "production": {
-          "buildTarget": "service-fulfillment:build:production"
+          "buildTarget": "service-delivery:build:production"
         }
       }
     }
