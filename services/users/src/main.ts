@@ -1,4 +1,4 @@
-import { Logger } from '@nestjs/common';
+import { Logger, ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { ConfigService } from '@nestjs/config';
 
@@ -7,8 +7,10 @@ import { Config } from './config';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  const configService = app.get(ConfigService<Config>);
 
+  app.useGlobalPipes(new ValidationPipe());
+
+  const configService = app.get(ConfigService<Config>);
   const { port } = configService.get<Config['misc']>('misc');
 
   Logger.log(`🚀 Users service is running on: http://localhost:${port}`);

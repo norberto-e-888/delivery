@@ -2,6 +2,7 @@ import {
   removeArrayDuplicates,
   genSchemaOptions,
   validateEnumArray,
+  BaseModel,
 } from '@delivery/utils';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument } from 'mongoose';
@@ -21,7 +22,7 @@ export enum UserRole {
     omitFromTransform: [],
   })
 )
-export class User {
+export class User extends BaseModel {
   @Prop({
     required: true,
   })
