@@ -9,9 +9,13 @@ import {
   UsersTopic,
   usersEventSignUpRoutingKeyGenerators,
 } from '@delivery/api';
-import { USERS_COLLECTION, User, UserRole } from '@delivery/models';
+import { USERS_COLLECTION, User } from '@delivery/models';
 import { OutboxService } from '@delivery/outbox';
-import { REDIS_PROVIDER_KEY, RedisProviderType } from '@delivery/providers';
+import {
+  AccessTokenPayload,
+  REDIS_PROVIDER_KEY,
+  RedisProviderType,
+} from '@delivery/providers';
 
 import { Model } from 'mongoose';
 import * as bcrypt from 'bcryptjs';
@@ -219,9 +223,4 @@ export type AuthenticatedResponse = {
 export type Tokens = {
   accessToken: string;
   refreshToken: string;
-};
-
-export type AccessTokenPayload = {
-  id: string;
-  roles: UserRole[];
 };

@@ -1,7 +1,69 @@
-import { Global, Module } from '@nestjs/common';
+import {
+  Global,
+  Module,
+  Injectable,
+  CanActivate,
+  ExecutionContext,
+  HttpException,
+  HttpStatus,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { JwtModule } from '@nestjs/jwt';
+import { JwtModule, JwtService } from '@nestjs/jwt';
+
+import { UserRole } from '@delivery/models';
+
 import Joi from 'joi';
+import { Request } from 'express';
+import { Reflector } from '@nestjs/core';
+
+@Injectable()
+export class JwtAuthGuard implements CanActivate {
+  constructor(
+    private readonly reflector: Reflector,
+    private readonly jwtService: JwtService
+  ) {}
+
+  async canActivate(context: ExecutionContext): Promise<boolean> {
+    const request = context.switchToHttp().getRequest<AppRequest>();
+    const accessToken = request.cookies[JwtCookie.AccessToken];
+
+    if (!accessToken) {
+      throw new HttpException(
+        'Access token not found',
+        HttpStatus.UNAUTHORIZED
+      );
+    }
+
+    const refreshToken = request.cookies[JwtCookie.RefreshToken];
+    const isRefreshEndpoint =
+      request.method === 'POST' && request.url === '/auth/refresh';
+
+    if (isRefreshEndpoint && !refreshToken) {
+      throw new HttpException(
+        'Refresh token not found',
+        HttpStatus.UNAUTHORIZED
+      );
+    }
+
+    try {
+      const payload = this.jwtService.verify<AccessTokenPayload>(accessToken, {
+        ignoreExpiration: isRefreshEndpoint,
+      });
+
+      const roles = this.reflector.get(Roles, context.getHandler());
+
+      if (roles && !roles.some((role) => payload.roles.includes(role))) {
+        throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
+      }
+
+      request.user = payload;
+    } catch (error) {
+      throw new HttpException('Invalid access token', HttpStatus.UNAUTHORIZED);
+    }
+
+    return true;
+  }
+}
 
 @Global()
 @Module({
@@ -30,6 +92,8 @@ import Joi from 'joi';
 })
 export class AppJwtModule {}
 
+export const Roles = Reflector.createDecorator<UserRole[]>();
+
 export const jwtConfigJoiSchema = Joi.object<JwtConfig>({
   jwt: Joi.object<JwtConfig['jwt']>({
     secret: Joi.string().required().length(64),
@@ -44,6 +108,11 @@ export const jwtConfigJoiSchema = Joi.object<JwtConfig>({
   }).required(),
 });
 
+export enum JwtCookie {
+  AccessToken = 'accessToken',
+  RefreshToken = 'refreshToken',
+}
+
 export type JwtConfig = {
   jwt: {
     secret: string;
@@ -51,3 +120,10 @@ export type JwtConfig = {
     refreshTokenDuration: number;
   };
 };
+
+export type AccessTokenPayload = {
+  id: string;
+  roles: UserRole[];
+};
+
+export type AppRequest = Request & { user: AccessTokenPayload };
