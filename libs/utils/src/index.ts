@@ -5,3 +5,4 @@ export * from './default-pagination';
 export * from './ensure-ref-integrity';
 export * from './gen-schema-options';
 export * from './point';
+export * from './validate-enum-array';
