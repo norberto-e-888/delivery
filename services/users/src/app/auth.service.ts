@@ -125,17 +125,23 @@ export class AuthService {
   }
 
   private async generateTokens(user: User): Promise<Tokens> {
+    const { accessTokenDuration, refreshTokenDuration } =
+      this.configService.get<Config['jwt']>('jwt');
+
     const payload: AccessTokenPayload = {
       id: user.id,
       roles: user.roles,
     };
 
-    const accessToken = this.jwtService.sign(payload, { expiresIn: '10m' });
+    const accessToken = this.jwtService.sign(payload, {
+      expiresIn: accessTokenDuration,
+    });
+
     const refreshToken = uuid();
     const hashedRefreshToken = await bcrypt.hash(refreshToken, 10);
 
     await this.redis.set(`refresh-token:${user.id}`, hashedRefreshToken, {
-      EX: 60 * 60 * 24 * 90,
+      EX: refreshTokenDuration,
     });
 
     return {

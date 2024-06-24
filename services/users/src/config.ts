@@ -1,10 +1,10 @@
 import {
-  AuthConfig,
+  JwtConfig,
   MongoConfig,
   RMQConfig,
   RedisConfig,
   SendgridConfig,
-  authConfigJoiSchema,
+  jwtConfigJoiSchema,
   mongoConfigJoiSchema,
   redisConfigJoiSchema,
   rmqConfigJoiSchema,
@@ -15,9 +15,10 @@ import Joi from 'joi';
 
 export const loadConfig = () => {
   const config: Config = {
-    auth: {
-      jwtSecret: process.env.AUTH_JWT_SECRET,
-      refreshTokenSecret: process.env.AUTH_REFRESH_TOKEN_SECRET,
+    jwt: {
+      secret: process.env.AUTH_JWT_SECRET,
+      accessTokenDuration: +process.env.AUTH_JWT_ACCESS_TOKEN_DURATION,
+      refreshTokenDuration: +process.env.AUTH_JWT_REFRESH_TOKEN_DURATION,
     },
     mongo: {
       uri: process.env.MONGO_URI,
@@ -39,7 +40,7 @@ export const loadConfig = () => {
   };
 
   const validationSchema = Joi.any()
-    .concat(authConfigJoiSchema)
+    .concat(jwtConfigJoiSchema)
     .concat(mongoConfigJoiSchema)
     .concat(redisConfigJoiSchema)
     .concat(rmqConfigJoiSchema)
@@ -57,7 +58,7 @@ export const loadConfig = () => {
   return config;
 };
 
-export type Config = AuthConfig &
+export type Config = JwtConfig &
   MongoConfig &
   RedisConfig &
   RMQConfig &
