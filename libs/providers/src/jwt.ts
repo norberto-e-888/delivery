@@ -72,7 +72,7 @@ export class JwtAuthGuard implements CanActivate {
         throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
       }
 
-      request.user = payload;
+      request.atp = payload;
     } catch (error) {
       throw new HttpException('Invalid access token', HttpStatus.UNAUTHORIZED);
     }
@@ -114,7 +114,7 @@ export const Roles = Reflector.createDecorator<UserRole[]>();
 export const AccessTokenPayload = createParamDecorator(
   (_: unknown, ctx: ExecutionContext) => {
     const request = ctx.switchToHttp().getRequest<AppRequest>();
-    return request.user;
+    return request.atp;
   }
 );
 
@@ -150,4 +150,4 @@ export type AccessTokenPayload = {
   roles: UserRole[];
 };
 
-export type AppRequest = Request & { user: AccessTokenPayload };
+export type AppRequest = Request & { atp: AccessTokenPayload };
