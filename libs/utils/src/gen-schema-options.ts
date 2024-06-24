@@ -1,7 +1,7 @@
 import { SchemaOptions } from '@nestjs/mongoose';
 import { BaseModel } from './base-model';
 
-export const getnSchemaOptions = <M extends BaseModel>(
+export const genSchemaOptions = <M extends BaseModel>(
   collection: string,
   options: Omit<
     SchemaOptions,
