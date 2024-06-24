@@ -12,9 +12,9 @@ export const USERS_COLLECTION = 'users';
 export enum UserRole {
   ADMIN = 'admin',
   DINER = 'diner',
+  DRIVER = 'driver',
   RESTAURANT_OWNER = 'restaurant_owner',
   RESTAURANT_ADMIN = 'restaurant_admin',
-  DRIVER = 'driver',
 }
 
 @Schema(
