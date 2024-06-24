@@ -11,12 +11,12 @@ import {
 } from '@delivery/api';
 import { USERS_COLLECTION, User, UserRole } from '@delivery/models';
 import { OutboxService } from '@delivery/outbox';
-import { REDIS_PROVIDER_KEY, RedisProvierType } from '@delivery/providers';
+import { REDIS_PROVIDER_KEY, RedisProviderType } from '@delivery/providers';
 
 import { Model } from 'mongoose';
 import * as bcrypt from 'bcryptjs';
 
-import { Config } from '../../config';
+import { Config } from '../config';
 
 @Injectable()
 export class AuthService {
@@ -24,7 +24,7 @@ export class AuthService {
     @InjectModel(User.name)
     private readonly userModel: Model<User>,
     @Inject(REDIS_PROVIDER_KEY)
-    private readonly redis: RedisProvierType,
+    private readonly redis: RedisProviderType,
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService<Config>,
     private readonly outboxService: OutboxService

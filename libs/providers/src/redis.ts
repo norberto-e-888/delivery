@@ -47,4 +47,4 @@ export type RedisConfig = {
   redis: { url: string; username: string; password: string };
 };
 
-export type RedisProvierType = ReturnType<typeof createClient>;
+export type RedisProviderType = ReturnType<typeof createClient>;

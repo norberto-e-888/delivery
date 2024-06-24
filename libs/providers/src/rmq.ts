@@ -1,18 +1,38 @@
 import { RabbitMQModule } from '@golevelup/nestjs-rabbitmq';
 import { DynamicModule, Global, Module } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+
 import Joi from 'joi';
 
 @Global()
 @Module({})
 export class AppRabbitMQModule {
-  static forRoot(topics: string[]): DynamicModule {
+  static forRoot(topics: Record<string, string>): DynamicModule {
     return {
       module: AppRabbitMQModule,
       imports: [
-        RabbitMQModule.forRoot(RabbitMQModule, {
-          exchanges: topics.map((topic) => ({ name: topic, type: 'topic' })),
-          uri: process.env['RMQ_URI'] as string,
-          connectionInitOptions: { wait: true },
+        RabbitMQModule.forRootAsync(RabbitMQModule, {
+          inject: [ConfigService],
+          useFactory: (configService: ConfigService) => {
+            const rmqConfig = configService.get<RMQConfig['rmq']>('rmq');
+
+            if (!rmqConfig) {
+              throw new Error(
+                'Expected to find rmq configuration under key "rmq"'
+              );
+            }
+
+            const { uri } = rmqConfig;
+
+            return {
+              exchanges: Object.values(topics).map((topic) => ({
+                name: topic,
+                type: 'topic',
+              })),
+              uri,
+              connectionInitOptions: { wait: true },
+            };
+          },
         }),
       ],
       exports: [RabbitMQModule],

@@ -1,5 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { MongooseModule } from '@nestjs/mongoose';
+import { User, UserSchema } from '@delivery/models';
 import { AppOutboxModule } from '@delivery/outbox';
 import {
   AppJwtModule,
@@ -11,7 +13,8 @@ import {
 import { UsersTopic } from '@delivery/api';
 
 import { loadConfig } from '../config';
-import { AuthModule } from './auth/auth.module';
+import { EmailVerificationService } from './email-verification.service';
+import { AuthService } from './auth.service';
 
 @Module({
   imports: [
@@ -19,13 +22,19 @@ import { AuthModule } from './auth/auth.module';
       isGlobal: true,
       load: [loadConfig],
     }),
-    AppRabbitMQModule.forRoot(Object.values(UsersTopic)),
+    MongooseModule.forFeature([
+      {
+        name: User.name,
+        schema: UserSchema,
+      },
+    ]),
     AppOutboxModule,
     AppJwtModule,
     AppMongoModule,
     AppRedisModule,
+    AppRabbitMQModule.forRoot(UsersTopic),
     AppSendgridModule,
-    AuthModule,
   ],
+  providers: [AuthService, EmailVerificationService],
 })
 export class AppModule {}
