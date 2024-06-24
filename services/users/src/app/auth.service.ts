@@ -107,48 +107,17 @@ export class AuthService {
     };
   }
 
-  async signOutFromSingleDevice(
-    user: User,
-    refreshToken: string
-  ): Promise<void> {
-    const { refreshTokenSecret } =
-      this.configService.get<Config['auth']>('auth');
-
-    const hashedRefreshToken = await bcrypt.hash(
-      refreshToken,
-      refreshTokenSecret
-    );
-
-    await this.redis.del(`refresh-token:${user.id}:${hashedRefreshToken}`);
-  }
-
-  async signOutFromAllDevices(user: User): Promise<void> {
-    const keys = await this.redis.keys(`refresh-token:${user.id}:*`);
-
-    if (keys.length) {
-      const multi = this.redis.multi();
-      for (const key of keys) {
-        multi.del(key);
-      }
-
-      await multi.exec();
-    }
+  async signOut(user: User): Promise<void> {
+    await this.redis.del(`refresh-token:${user.id}`);
   }
 
   async refreshTokens(user: User, refreshToken: string): Promise<Tokens> {
-    const { refreshTokenSecret } =
-      this.configService.get<Config['auth']>('auth');
+    const hashedRefreshToken = await this.redis.get(`refresh-token:${user.id}`);
+    const isTokenValid =
+      hashedRefreshToken &&
+      (await bcrypt.compare(refreshToken, hashedRefreshToken));
 
-    const hashedRefreshToken = await bcrypt.hash(
-      refreshToken,
-      refreshTokenSecret
-    );
-
-    const refreshTokenKey = `refresh-token:${user.id}:${hashedRefreshToken}`;
-    const tokenUsage = await this.redis.incr(refreshTokenKey);
-
-    if (tokenUsage !== 1) {
-      await this.redis.sAdd('compromised-users', user.id);
+    if (!isTokenValid) {
       throw new HttpException('Invalid refresh token', HttpStatus.UNAUTHORIZED);
     }
 
@@ -156,25 +125,16 @@ export class AuthService {
   }
 
   private async generateTokens(user: User): Promise<Tokens> {
-    const payload: {
-      id: string;
-      roles: UserRole[];
-    } = {
+    const payload: AccessTokenPayload = {
       id: user.id,
       roles: user.roles,
     };
 
     const accessToken = this.jwtService.sign(payload, { expiresIn: '10m' });
     const refreshToken = uuid();
-    const { refreshTokenSecret } =
-      this.configService.get<Config['auth']>('auth');
+    const hashedRefreshToken = await bcrypt.hash(refreshToken, 10);
 
-    const hashedRefreshToken = await bcrypt.hash(
-      refreshToken,
-      refreshTokenSecret
-    );
-
-    await this.redis.set(`refresh-token:${user.id}:${hashedRefreshToken}`, 0, {
+    await this.redis.set(`refresh-token:${user.id}`, hashedRefreshToken, {
       EX: 60 * 60 * 24 * 90,
     });
 
