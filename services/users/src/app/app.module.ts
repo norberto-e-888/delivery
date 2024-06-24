@@ -4,6 +4,7 @@ import {
   AppJwtModule,
   AppMongoModule,
   AppRedisModule,
+  AppSendgridModule,
 } from '@delivery/providers';
 
 import { loadConfig } from '../config';
@@ -18,6 +19,7 @@ import { AuthModule } from './auth/auth.module';
     AppJwtModule,
     AppMongoModule,
     AppRedisModule,
+    AppSendgridModule,
     AuthModule,
   ],
 })

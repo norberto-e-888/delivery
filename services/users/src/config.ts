@@ -13,10 +13,6 @@ export const loadConfig = () => ({
   sendgrid: {
     apiKey: process.env.SENDGRID_API_KEY,
   },
-  twilio: {
-    sid: process.env.TWILIO_SID,
-    authToken: process.env.TWILIO_AUTH_TOKEN,
-  },
   misc: {
     port: +process.env.PORT,
   },
