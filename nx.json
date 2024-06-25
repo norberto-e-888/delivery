@@ -44,7 +44,8 @@
         "services/order-assignment-e2e/**/*",
         "services/users-e2e/**/*",
         "services/users-e2e/**/*",
-        "services/delivery-e2e/**/*"
+        "services/delivery-e2e/**/*",
+        "services/messaging-e2e/**/*"
       ]
     }
   ]

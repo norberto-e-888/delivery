@@ -1,0 +1,24 @@
+{
+  "name": "service-messaging",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "services/messaging/src",
+  "projectType": "application",
+  "tags": [],
+  "targets": {
+    "serve": {
+      "executor": "@nx/js:node",
+      "defaultConfiguration": "development",
+      "options": {
+        "buildTarget": "service-messaging:build"
+      },
+      "configurations": {
+        "development": {
+          "buildTarget": "service-messaging:build:development"
+        },
+        "production": {
+          "buildTarget": "service-messaging:build:production"
+        }
+      }
+    }
+  }
+}
