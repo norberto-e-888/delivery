@@ -16,10 +16,10 @@ export class PublishOutboxCommand {
 }
 
 @CommandHandler(PublishOutboxCommand)
-export class OutboxPublisherHandler
+export class OutboxPrismaPublisher
   implements ICommandHandler<PublishOutboxCommand>
 {
-  private readonly logger = new Logger(OutboxPublisherHandler.name);
+  private readonly logger = new Logger(OutboxPrismaPublisher.name);
 
   constructor(
     @Inject(PRISMA)
