@@ -1,14 +1,15 @@
-import { UsersEndpoint, UsersSignInBody, UsersSignUpBody } from '@delivery/api';
+import {
+  UsersAuthEndpoint,
+  UsersModule,
+  UsersSignInBody,
+  UsersSignUpBody,
+} from '@delivery/api';
 import { Body, Controller, Get, Post, Res, UseGuards } from '@nestjs/common';
 
 import { Response, CookieOptions } from 'express';
 
 import { AuthService } from './auth.service';
-import {
-  AccessTokenPayload,
-  JwtAuthGuard,
-  JwtCookie,
-} from '@delivery/providers';
+import { AccessTokenPayload, IsLoggedIn, JwtCookie } from '@delivery/auth';
 import { Cookie } from '@delivery/utils';
 
 const COOKIE_OPTIONS: CookieOptions = {
@@ -18,11 +19,11 @@ const COOKIE_OPTIONS: CookieOptions = {
   maxAge: +process.env.AUTH_JWT_REFRESH_TOKEN_DURATION * 1000,
 };
 
-@Controller('auth')
+@Controller(UsersModule.Auth)
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  @Post(UsersEndpoint.SignUp)
+  @Post(UsersAuthEndpoint.SignUp)
   async handleSignUp(
     @Body() body: UsersSignUpBody,
     @Res({ passthrough: true }) res: Response
@@ -37,7 +38,7 @@ export class AuthController {
     };
   }
 
-  @Post(UsersEndpoint.SignIn)
+  @Post(UsersAuthEndpoint.SignIn)
   async handleSignIn(
     @Body() body: UsersSignInBody,
     @Res({ passthrough: true }) res: Response
@@ -52,8 +53,8 @@ export class AuthController {
     };
   }
 
-  @UseGuards(JwtAuthGuard)
-  @Post(UsersEndpoint.SignOut)
+  @UseGuards(IsLoggedIn)
+  @Post(UsersAuthEndpoint.SignOut)
   async handleSignOut(
     @Res({ passthrough: true }) res: Response,
     @AccessTokenPayload() atp: AccessTokenPayload,
@@ -69,8 +70,8 @@ export class AuthController {
     };
   }
 
-  @UseGuards(JwtAuthGuard)
-  @Post(UsersEndpoint.Refresh)
+  @UseGuards(IsLoggedIn)
+  @Post(UsersAuthEndpoint.Refresh)
   async handleRefresh(
     @Res({ passthrough: true }) res: Response,
     @AccessTokenPayload() atp: AccessTokenPayload,
@@ -87,8 +88,8 @@ export class AuthController {
     };
   }
 
-  @UseGuards(JwtAuthGuard)
-  @Get(UsersEndpoint.Me)
+  @UseGuards(IsLoggedIn)
+  @Get(UsersAuthEndpoint.Me)
   async handleMe(@AccessTokenPayload() atp: AccessTokenPayload) {
     const user = await this.authService.findUserById(atp.id);
 

@@ -1,21 +1,25 @@
 export * from './sign-in';
 export * from './sign-up';
 
-export enum UsersEndpoint {
-  SignUp = '/sign-up',
-  SignIn = '/sign-in',
-  SignOut = '/sign-out',
-  Refresh = '/refresh',
-  Me = '/me',
+type Method = 'POST' | 'GET' | 'DELETE' | 'PATCH';
+
+export enum UsersModule {
+  Auth = 'auth',
+  Verification = 'verification',
 }
 
-export const UsersEndpointToMethodMap: Record<
-  UsersEndpoint,
-  'POST' | 'GET' | 'DEL' | 'PATCH'
-> = {
-  [UsersEndpoint.SignUp]: 'POST',
-  [UsersEndpoint.SignIn]: 'POST',
-  [UsersEndpoint.SignOut]: 'POST',
-  [UsersEndpoint.Refresh]: 'POST',
-  [UsersEndpoint.Me]: 'GET',
+export enum UsersAuthEndpoint {
+  SignUp = 'sign-up',
+  SignIn = 'sign-in',
+  SignOut = 'sign-out',
+  Refresh = 'refresh',
+  Me = 'me',
+}
+
+export const UsersAuthEndpointToMethodMap: Record<UsersAuthEndpoint, Method> = {
+  [UsersAuthEndpoint.SignUp]: 'POST',
+  [UsersAuthEndpoint.SignIn]: 'POST',
+  [UsersAuthEndpoint.SignOut]: 'POST',
+  [UsersAuthEndpoint.Refresh]: 'POST',
+  [UsersAuthEndpoint.Me]: 'GET',
 };

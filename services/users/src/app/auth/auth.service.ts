@@ -9,12 +9,8 @@ import {
   usersEventSignUpRoutingKeyGenerators,
 } from '@delivery/api';
 import { User } from '@prisma/users';
-import {
-  AccessTokenPayload,
-  PRISMA,
-  REDIS,
-  RedisProviderType,
-} from '@delivery/providers';
+import { PRISMA, REDIS, RedisProviderType } from '@delivery/providers';
+import { AccessTokenPayload } from '@delivery/auth';
 
 import * as bcrypt from 'bcryptjs';
 import { v4 as uuid } from 'uuid';
