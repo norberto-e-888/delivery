@@ -85,7 +85,7 @@ export class VerificationService {
       throw new HttpException('Invalid token', HttpStatus.BAD_REQUEST);
     }
 
-    const updatedUser = await this.prisma.user.update({
+    const updatedUser = await this.prisma.passwordSafe.user.update({
       where: {
         id: userId,
       },
@@ -93,8 +93,6 @@ export class VerificationService {
         isEmailVerified: true,
       },
     });
-
-    delete updatedUser.password;
 
     this.redis
       .del(`email-verification-token:${userId}`)

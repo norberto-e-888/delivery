@@ -12,7 +12,6 @@ import { User } from '@prisma/users';
 import { REDIS, Redis } from '@delivery/providers';
 import { AccessTokenPayload } from '@delivery/auth';
 import { OutboxPrismaService } from '@delivery/outbox-prisma';
-import { PrismaClient } from '@prisma/users';
 
 import * as bcrypt from 'bcryptjs';
 import { v4 as uuid } from 'uuid';
@@ -27,7 +26,7 @@ export class AuthService {
     private readonly redis: Redis,
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService<Config>,
-    private readonly outboxPrismaService: OutboxPrismaService<PrismaClient>,
+    private readonly outboxPrismaService: OutboxPrismaService<PrismaService>,
     private readonly prisma: PrismaService
   ) {}
 
@@ -37,6 +36,9 @@ export class AuthService {
         const existingUser = await prisma.user.findUnique({
           where: {
             email: dto.email,
+          },
+          select: {
+            id: true,
           },
         });
 
@@ -48,15 +50,13 @@ export class AuthService {
         }
 
         const hashedPassword = await bcrypt.hash(dto.password, 12);
-        const newUser = await prisma.user.create({
+        const newUser = await prisma.passwordSafe.user.create({
           data: {
             name: dto.name,
             email: dto.email,
             password: hashedPassword,
           },
         });
-
-        delete newUser.password;
 
         return newUser;
       },
@@ -81,7 +81,7 @@ export class AuthService {
   }
 
   async signIn(dto: UsersAuthSignInBody): Promise<AuthenticatedResponse> {
-    const existingUser = await this.prisma.user.findUnique({
+    const existingUser = await this.prisma.passwordSafe.user.findUnique({
       where: {
         email: dto.email,
       },
@@ -91,16 +91,24 @@ export class AuthService {
       throw new HttpException('Invalid credentials', HttpStatus.NOT_FOUND);
     }
 
+    const userWithPassword = await this.prisma.user
+      .findUniqueOrThrow({
+        where: {
+          id: existingUser.id,
+        },
+      })
+      .catch(() => {
+        throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+      });
+
     const isPasswordValid = await bcrypt.compare(
       dto.password,
-      existingUser.password
+      userWithPassword.password
     );
 
     if (!isPasswordValid) {
       throw new HttpException('Invalid credentials', HttpStatus.NOT_FOUND);
     }
-
-    delete existingUser.password;
 
     return {
       user: existingUser,
@@ -143,7 +151,15 @@ export class AuthService {
       const isTokenValid = token && (await bcrypt.compare(refreshToken, token));
 
       if (isTokenValid) {
-        const user = await this.prisma.findUserById(userId);
+        const user = await this.prisma.user
+          .findUniqueOrThrow({
+            where: {
+              id: userId,
+            },
+          })
+          .catch(() => {
+            throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+          });
 
         return this.generateTokens(
           {

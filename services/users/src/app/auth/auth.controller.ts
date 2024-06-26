@@ -1,4 +1,13 @@
-import { Body, Controller, Get, Post, Res, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpException,
+  HttpStatus,
+  Post,
+  Res,
+  UseGuards,
+} from '@nestjs/common';
 import {
   UsersAuthEndpoint,
   UsersModule,
@@ -95,9 +104,15 @@ export class AuthController {
   @UseGuards(IsLoggedIn)
   @Get(UsersAuthEndpoint.Me)
   async handleMe(@AccessTokenPayload() atp: AccessTokenPayload) {
-    const user = await this.prisma.findUserById(atp.id);
-
-    delete user.password;
+    const user = await this.prisma.passwordSafe.user
+      .findUniqueOrThrow({
+        where: {
+          id: atp.id,
+        },
+      })
+      .catch(() => {
+        throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+      });
 
     return {
       user,
