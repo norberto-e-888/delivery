@@ -10,7 +10,12 @@ import {
   rmqConfigJoiSchema,
   sendgridConfigJoiSchema,
 } from '@delivery/providers';
-import { CommonConfig, commonConfigJoiSchema } from '@delivery/utils';
+import {
+  CommonConfig,
+  commonConfigJoiSchema,
+  PrismaConfig,
+  prismaConfigJoiSchema,
+} from '@delivery/utils';
 import Joi from 'joi';
 
 export const loadConfig = () => {
@@ -22,6 +27,9 @@ export const loadConfig = () => {
     },
     mongo: {
       uri: process.env.MONGO_URI,
+    },
+    prisma: {
+      url: process.env.POSTGRES_URL,
     },
     redis: {
       url: process.env.REDIS_URL,
@@ -43,6 +51,7 @@ export const loadConfig = () => {
   const validationSchema = Joi.any()
     .concat(jwtConfigJoiSchema)
     .concat(mongoConfigJoiSchema)
+    .concat(prismaConfigJoiSchema)
     .concat(redisConfigJoiSchema)
     .concat(rmqConfigJoiSchema)
     .concat(sendgridConfigJoiSchema)
@@ -70,6 +79,7 @@ type ServiceConfig = {
 
 export type Config = JwtConfig &
   MongoConfig &
+  PrismaConfig &
   RedisConfig &
   RMQConfig &
   SendgridConfig &

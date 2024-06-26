@@ -7,6 +7,7 @@ export * from './default-pagination';
 export * from './ensure-ref-integrity';
 export * from './gen-schema-options';
 export * from './point';
+export * from './prisma-config';
 export * from './remove-array-duplicates';
 export * from './routing-key-generators';
 export * from './validate-enum-array';

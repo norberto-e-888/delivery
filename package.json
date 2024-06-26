@@ -4,7 +4,8 @@
   "license": "MIT",
   "scripts": {
     "up": "docker-compose -f ./docker/compose.yaml up -d",
-    "down": "docker-compose -f ./docker/compose.yaml down"
+    "down": "docker-compose -f ./docker/compose.yaml down",
+    "generate": "prisma generate --schema=./prisma/$SERVICE/schema.prisma"
   },
   "private": true,
   "devDependencies": {
@@ -35,6 +36,7 @@
     "jest-environment-node": "^29.4.1",
     "nx": "19.3.1",
     "prettier": "^2.6.2",
+    "prisma": "^5.16.0",
     "ts-jest": "^29.1.0",
     "ts-node": "10.9.1",
     "typescript": "~5.4.2",
@@ -50,6 +52,7 @@
     "@nestjs/mongoose": "^10.0.6",
     "@nestjs/platform-express": "^10.0.2",
     "@nestjs/swagger": "^7.3.1",
+    "@prisma/client": "^5.16.0",
     "@sendgrid/mail": "^8.1.3",
     "axios": "^1.6.0",
     "bcryptjs": "^2.4.3",

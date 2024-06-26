@@ -15,6 +15,7 @@ import { UsersTopic } from '@delivery/api';
 import { loadConfig } from '../config';
 import { EmailVerificationService } from './email-verification.service';
 import { AuthService } from './auth.service';
+import { AppPrismaModule } from '../prisma';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { AuthService } from './auth.service';
         schema: UserSchema,
       },
     ]),
+    AppPrismaModule,
     AppOutboxModule,
     AppJwtModule,
     AppMongoModule,
