@@ -9,7 +9,7 @@ import {
   usersAuthSignUpEventRoutingKeyGenerators,
 } from '@delivery/api';
 import { User } from '@prisma/users';
-import { PRISMA, REDIS, Redis } from '@delivery/providers';
+import { REDIS, Redis } from '@delivery/providers';
 import { AccessTokenPayload } from '@delivery/auth';
 import { OutboxPrismaService } from '@delivery/outbox-prisma';
 import { PrismaClient } from '@prisma/users';
@@ -18,21 +18,21 @@ import * as bcrypt from 'bcryptjs';
 import { v4 as uuid } from 'uuid';
 
 import { Config } from '../../config';
+import { PrismaService } from '../../prisma';
 
 @Injectable()
 export class AuthService {
   constructor(
-    @Inject(PRISMA)
-    private readonly prisma: PrismaClient,
     @Inject(REDIS)
     private readonly redis: Redis,
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService<Config>,
-    private readonly outboxPostgresService: OutboxPrismaService<PrismaClient>
+    private readonly outboxPrismaService: OutboxPrismaService<PrismaClient>,
+    private readonly prisma: PrismaService
   ) {}
 
   async signUp(dto: UsersAuthSignUpBody): Promise<AuthenticatedResponse> {
-    const newUser = await this.outboxPostgresService.publish(
+    const newUser = await this.outboxPrismaService.publish(
       async (prisma) => {
         const existingUser = await prisma.user.findUnique({
           where: {
@@ -143,7 +143,7 @@ export class AuthService {
       const isTokenValid = token && (await bcrypt.compare(refreshToken, token));
 
       if (isTokenValid) {
-        const user = await this.findUserById(userId);
+        const user = await this.prisma.findUserById(userId);
 
         return this.generateTokens(
           {
@@ -167,20 +167,6 @@ export class AuthService {
     this.redis.set(`consider-all-tokens-expired:${userId}`, 1, {
       EX: accessTokenDuration,
     });
-  }
-
-  async findUserById(id: string): Promise<User> {
-    const user = await this.prisma.user.findUnique({
-      where: {
-        id,
-      },
-    });
-
-    if (!user) {
-      throw new HttpException('User not found', HttpStatus.NOT_FOUND);
-    }
-
-    return user;
   }
 
   private async generateTokens(

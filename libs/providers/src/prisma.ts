@@ -1,3 +1,9 @@
+/**
+ * initially we had abstracted the creation of a PrismaService to this provider but we realized that
+ * it's actually beneficial for each service to declare its own PrismaService, as they might want to
+ * add custom methods for repeated data-layer logic
+ */
+
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import {
   DynamicModule,
@@ -5,9 +11,6 @@ import {
   Module,
   ModuleMetadata,
   Provider,
-  OnModuleInit,
-  OnModuleDestroy,
-  Injectable,
 } from '@nestjs/common';
 import Joi from 'joi';
 
@@ -16,57 +19,41 @@ export const PRISMA = Symbol('PRISMA');
 @Global()
 @Module({})
 export class AppPrismaModule {
-  static forRootAsync<T extends new (...args: any[]) => any>(
+  static forRootAsync<T extends Constructor>(
     options: PrismaModuleAsyncOptions<T>
   ): DynamicModule {
-    const { PrismaClientClass } = options;
-    const PrismaServiceClass = createPrismaService(PrismaClientClass);
-    const PrismaServiceProvider: Provider = {
-      provide: PRISMA,
-      useFactory: async (...args: any[]) => {
-        const { databaseUrl } = await options.useFactory(...args);
-        return new PrismaServiceClass({
-          datasources: {
-            db: {
-              url: databaseUrl,
-            },
+    const { PrismaService } = options;
+    const factory = async (...args: any[]) => {
+      const { databaseUrl } = await options.useFactory(...args);
+      return new PrismaService({
+        datasources: {
+          db: {
+            url: databaseUrl,
           },
-        });
-      },
+        },
+      });
+    };
+
+    const PrismaServiceProvider: Provider = {
+      provide: PrismaService,
+      useFactory: factory,
+      inject: options.inject,
+    };
+
+    // useful to the outbox-prisma lib
+    const PrismaTokenProvider: Provider = {
+      provide: PRISMA,
+      useFactory: factory,
       inject: options.inject,
     };
 
     return {
       module: AppPrismaModule,
       imports: [AppPrismaModule],
-      providers: [PrismaServiceProvider],
-      exports: [PrismaServiceProvider],
+      providers: [PrismaServiceProvider, PrismaTokenProvider],
+      exports: [PrismaServiceProvider, PrismaTokenProvider],
     };
   }
-}
-
-function createPrismaService<T extends new (...args: any[]) => any>(
-  BaseClass: T
-) {
-  @Injectable()
-  class PrismaService
-    extends BaseClass
-    implements OnModuleInit, OnModuleDestroy
-  {
-    constructor(...args: any[]) {
-      super(args[0]);
-    }
-
-    async onModuleInit() {
-      await this['$connect']();
-    }
-
-    async onModuleDestroy() {
-      await this['$disconnect']();
-    }
-  }
-
-  return PrismaService;
 }
 
 export const prismaConfigJoiSchema = Joi.object<PrismaConfig>({
@@ -81,15 +68,18 @@ export type PrismaConfig = {
   };
 };
 
+type Constructor = new (...args: any[]) => any;
+
+type UseFactory = (
+  ...args: any[]
+) => Promise<PrismaModuleOptions> | PrismaModuleOptions;
 interface PrismaModuleOptions {
   databaseUrl: string;
 }
 
-interface PrismaModuleAsyncOptions<T extends new (...args: any[]) => any>
+interface PrismaModuleAsyncOptions<T extends Constructor>
   extends ModuleMetadata {
   inject?: any[];
-  PrismaClientClass: T;
-  useFactory: (
-    ...args: any[]
-  ) => Promise<PrismaModuleOptions> | PrismaModuleOptions;
+  PrismaService: T;
+  useFactory: UseFactory;
 }

@@ -1,16 +1,17 @@
+import { Body, Controller, Get, Post, Res, UseGuards } from '@nestjs/common';
 import {
   UsersAuthEndpoint,
   UsersModule,
   UsersAuthSignInBody,
   UsersAuthSignUpBody,
 } from '@delivery/api';
-import { Body, Controller, Get, Post, Res, UseGuards } from '@nestjs/common';
+import { AccessTokenPayload, IsLoggedIn, JwtCookie } from '@delivery/auth';
+import { Cookie } from '@delivery/utils';
 
 import { Response, CookieOptions } from 'express';
 
 import { AuthService } from './auth.service';
-import { AccessTokenPayload, IsLoggedIn, JwtCookie } from '@delivery/auth';
-import { Cookie } from '@delivery/utils';
+import { PrismaService } from '../../prisma';
 
 const COOKIE_OPTIONS: CookieOptions = {
   httpOnly: true,
@@ -21,7 +22,10 @@ const COOKIE_OPTIONS: CookieOptions = {
 
 @Controller(UsersModule.Auth)
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly prisma: PrismaService
+  ) {}
 
   @Post(UsersAuthEndpoint.SignUp)
   async handleSignUp(
@@ -91,7 +95,7 @@ export class AuthController {
   @UseGuards(IsLoggedIn)
   @Get(UsersAuthEndpoint.Me)
   async handleMe(@AccessTokenPayload() atp: AccessTokenPayload) {
-    const user = await this.authService.findUserById(atp.id);
+    const user = await this.prisma.findUserById(atp.id);
 
     delete user.password;
 

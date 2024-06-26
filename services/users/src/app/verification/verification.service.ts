@@ -10,14 +10,13 @@ import { ConfigService } from '@nestjs/config';
 import { REDIS, Redis, SENDGRID, Sendgrid } from '@delivery/providers';
 import { UsersAuthSignUpEventPayload, UsersTopic } from '@delivery/api';
 import { Environment, RMQMessage } from '@delivery/utils';
-import { PRISMA } from '@delivery/providers';
-import { PrismaClient } from '@prisma/users';
 
 import { RabbitSubscribe } from '@golevelup/nestjs-rabbitmq';
 import { v4 as uuid } from 'uuid';
 import * as bcrypt from 'bcryptjs';
 import { inspect } from 'util';
 import { Config } from '../../config';
+import { PrismaService } from '../../prisma';
 
 @Injectable()
 export class VerificationService {
@@ -28,8 +27,7 @@ export class VerificationService {
     private readonly sendgrid: Sendgrid,
     @Inject(REDIS)
     private readonly redis: Redis,
-    @Inject(PRISMA)
-    private readonly prisma: PrismaClient,
+    private readonly prisma: PrismaService,
     private readonly configService: ConfigService<Config>
   ) {}
 

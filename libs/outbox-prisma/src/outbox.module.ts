@@ -9,4 +9,4 @@ import { OutboxPrismaService } from './outbox.service';
   providers: [OutboxPrismaPublisher, OutboxPrismaService],
   exports: [OutboxPrismaService],
 })
-export class AppOutboxPostgresModule {}
+export class AppOutboxPrismaModule {}
