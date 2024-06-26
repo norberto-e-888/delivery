@@ -17,14 +17,14 @@ import { UserRole } from '@prisma/users';
 import Joi from 'joi';
 import { Request } from 'express';
 import { Reflector } from '@nestjs/core';
-import { AppRedisModule, REDIS_PROVIDER_KEY, RedisProviderType } from './redis';
+import { AppRedisModule, REDIS, RedisProviderType } from './redis';
 
 @Injectable()
 export class JwtAuthGuard implements CanActivate {
   constructor(
     private readonly reflector: Reflector,
     private readonly jwtService: JwtService,
-    @Inject(REDIS_PROVIDER_KEY)
+    @Inject(REDIS)
     private readonly redis: RedisProviderType
   ) {}
 

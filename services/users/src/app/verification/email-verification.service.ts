@@ -7,9 +7,9 @@ import {
 } from '@nestjs/common';
 
 import {
-  REDIS_PROVIDER_KEY,
+  REDIS,
   RedisProviderType,
-  SENDGRID_PROVIDER_KEY,
+  SENDGRID,
   SendgridProviderType,
 } from '@delivery/providers';
 import { UsersEventSignUpPayload, UsersTopic } from '@delivery/api';
@@ -27,9 +27,9 @@ export class EmailVerificationService {
   private readonly logger = new Logger(EmailVerificationService.name);
 
   constructor(
-    @Inject(SENDGRID_PROVIDER_KEY)
+    @Inject(SENDGRID)
     private readonly sendgrid: SendgridProviderType,
-    @Inject(REDIS_PROVIDER_KEY)
+    @Inject(REDIS)
     private readonly redis: RedisProviderType,
     @Inject(PRISMA)
     private readonly prisma: PrismaClient

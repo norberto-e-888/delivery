@@ -12,7 +12,7 @@ import { User } from '@prisma/users';
 import {
   AccessTokenPayload,
   PRISMA,
-  REDIS_PROVIDER_KEY,
+  REDIS,
   RedisProviderType,
 } from '@delivery/providers';
 
@@ -28,7 +28,7 @@ export class AuthService {
   constructor(
     @Inject(PRISMA)
     private readonly prisma: PrismaClient,
-    @Inject(REDIS_PROVIDER_KEY)
+    @Inject(REDIS)
     private readonly redis: RedisProviderType,
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService<Config>,

@@ -3,9 +3,9 @@ import { ConfigService } from '@nestjs/config';
 import Joi from 'joi';
 import { createClient } from 'redis';
 
-export const REDIS_PROVIDER_KEY = Symbol('REDIS_PROVIDER_KEY');
+export const REDIS = Symbol('REDIS');
 export const redisProvider: Provider = {
-  provide: REDIS_PROVIDER_KEY,
+  provide: REDIS,
   inject: [ConfigService],
   useFactory: async (config: ConfigService<RedisConfig>) => {
     const redisConfig = config.get<RedisConfig['redis']>('redis');

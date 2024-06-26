@@ -3,9 +3,9 @@ import { ConfigService } from '@nestjs/config';
 import sendgrid from '@sendgrid/mail';
 import Joi from 'joi';
 
-export const SENDGRID_PROVIDER_KEY = Symbol('SENDGRID_PROVIDER_KEY');
+export const SENDGRID = Symbol('SENDGRID');
 export const sendgridProvider: Provider = {
-  provide: SENDGRID_PROVIDER_KEY,
+  provide: SENDGRID,
   inject: [ConfigService],
   useFactory: async (config: ConfigService<SendgridConfig>) => {
     const sendgridConfig = config.get<SendgridConfig['sendgrid']>('sendgrid');
