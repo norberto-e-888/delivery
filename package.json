@@ -5,7 +5,8 @@
   "scripts": {
     "up": "docker-compose -f ./docker/compose.yaml up -d",
     "down": "docker-compose -f ./docker/compose.yaml down",
-    "generate": "prisma generate --schema=./prisma/$SERVICE/schema.prisma"
+    "generate": "prisma generate --schema=./prisma/$SERVICE/schema.prisma",
+    "migrate": "prisma migrate dev --schema=./prisma/$SERVICE/schema.prisma"
   },
   "private": true,
   "devDependencies": {

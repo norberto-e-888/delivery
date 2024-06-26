@@ -33,8 +33,6 @@ export const loadConfig = () => {
     },
     redis: {
       url: process.env.REDIS_URL,
-      username: process.env.REDIS_USER,
-      password: process.env.REDIS_PASSWORD,
     },
     rmq: {
       uri: process.env.RMQ_URI,

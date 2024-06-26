@@ -2,40 +2,33 @@ version: '3.8'
 name: delivery
 
 services:
-  rabbitmq:
-    image: rabbitmq:3-management
-    ports:
-      - '5672:5672'
-      - '15672:15672'
-    volumes:
-      - rabbitmq_data:/var/lib/rabbitmq
-    environment:
-      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
-      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD}
-
-  users_redis:
-    image: redis:alpine
-    command: redis-server --requirepass ${REDIS_PASSWORD} --user ${REDIS_USER} on >${REDIS_PASSWORD} ~* allcommands
-    ports:
-      - '2000:6379'
-    volumes:
-      - users_redis_data:/data
-    environment:
-      REDIS_USER: ${REDIS_USER}
-      REDIS_PASSWORD: ${REDIS_PASSWORD}
-
-  users_postgres:
+  postgres:
     image: postgres:15
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_DB: postgres
     ports:
       - '1000:5432'
     volumes:
-      - users_postgres_data:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql/data
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - '1001:5672'
+      - '1002:15672'
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq/data
+
+  users_redis:
+    image: redis:alpine
+    ports:
+      - '2000:6379'
+    volumes:
+      - users_redis_data:/var/lib/redis/data
 
 volumes:
+  postgres_data:
   rabbitmq_data:
   users_redis_data:
-  users_postgres_data:

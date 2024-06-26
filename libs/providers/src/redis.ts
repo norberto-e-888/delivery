@@ -14,12 +14,10 @@ export const redisProvider: Provider = {
       throw new Error('Expected to find redis configuration under key "redis"');
     }
 
-    const { url, username, password } = redisConfig;
+    const { url } = redisConfig;
 
     const client = createClient({
       url,
-      username,
-      password,
     });
 
     await client.connect();
@@ -38,13 +36,11 @@ export class AppRedisModule {}
 export const redisConfigJoiSchema = Joi.object<RedisConfig>({
   redis: Joi.object<RedisConfig['redis']>({
     url: Joi.string().required(),
-    username: Joi.string().required(),
-    password: Joi.string().required(),
   }).required(),
 });
 
 export type RedisConfig = {
-  redis: { url: string; username: string; password: string };
+  redis: { url: string };
 };
 
 export type RedisProviderType = ReturnType<typeof createClient>;
