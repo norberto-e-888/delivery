@@ -10,7 +10,13 @@ import { Config } from './config';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  app.useGlobalPipes(new ValidationPipe());
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true,
+      forbidNonWhitelisted: true,
+    })
+  );
+
   app.use(cookieParser());
 
   const configService = app.get(ConfigService<Config>);
