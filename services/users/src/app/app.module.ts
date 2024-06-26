@@ -13,6 +13,7 @@ import { loadConfig } from '../config';
 import { EmailVerificationService } from './email-verification.service';
 import { AuthService } from './auth.service';
 import { AppPrismaModule } from '../prisma';
+import { AuthController } from './auth.controller';
 
 @Module({
   imports: [
@@ -28,5 +29,6 @@ import { AppPrismaModule } from '../prisma';
     AppSendgridModule,
   ],
   providers: [AuthService, EmailVerificationService],
+  controllers: [AuthController],
 })
 export class AppModule {}
