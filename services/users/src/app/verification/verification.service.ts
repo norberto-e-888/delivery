@@ -34,9 +34,9 @@ export class VerificationService {
   @RabbitSubscribe({
     exchange: UsersTopic.SignUp,
     routingKey: '#',
-    queue: 'users.send-email-verification',
+    queue: 'users.verification.send-verification-email',
   })
-  protected async sendEmailVerification(
+  protected async sendVerificationEmail(
     message: RMQMessage<UsersAuthSignUpEventPayload>
   ) {
     try {
