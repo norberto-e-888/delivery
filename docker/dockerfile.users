@@ -1,6 +1,9 @@
 # Use Node.js as the base image
 FROM node:18-alpine AS build
 
+# Expose the port the app runs on
+EXPOSE 3000
+
 # Set working directory
 WORKDIR /app
 
@@ -25,9 +28,6 @@ WORKDIR /app
 COPY --from=build /app/dist/services/users ./dist
 COPY --from=build /app/node_modules ./node_modules
 COPY --from=build /app/package*.json ./
-
-# Expose the port the app runs on
-EXPOSE 3000
 
 # Command to run the application
 CMD ["node", "dist/main.js"]
