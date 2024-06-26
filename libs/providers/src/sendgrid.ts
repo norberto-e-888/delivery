@@ -1,13 +1,49 @@
-import { Global, Module, Provider } from '@nestjs/common';
+import { Global, Logger, Module, Provider } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import sendgrid from '@sendgrid/mail';
+
+import { CommonConfig, Environment } from '@delivery/utils';
+
 import Joi from 'joi';
 
 export const SENDGRID = Symbol('SENDGRID');
 export const sendgridProvider: Provider = {
   provide: SENDGRID,
   inject: [ConfigService],
-  useFactory: async (config: ConfigService<SendgridConfig>) => {
+  useFactory: async (config: ConfigService<SendgridConfig & CommonConfig>) => {
+    const commonConfig = config.get<CommonConfig['common']>('common');
+
+    if (!commonConfig) {
+      throw new Error(
+        'Expected to find common configuration under key "common"'
+      );
+    }
+
+    const { environment } = commonConfig;
+
+    if (
+      environment === Environment.Development ||
+      environment === Environment.Testing
+    ) {
+      const sendgridMock = {
+        send: async (args: {
+          from: string;
+          to: string;
+          subject: string;
+          text: string;
+        }) => {
+          Logger.debug(
+            `Used mock sendgrid instance...\nEmail data:${JSON.stringify(
+              args
+            )}`,
+            'Sendgrid'
+          );
+        },
+      };
+
+      return sendgridMock;
+    }
+
     const sendgridConfig = config.get<SendgridConfig['sendgrid']>('sendgrid');
 
     if (!sendgridConfig) {

@@ -5,17 +5,16 @@ import {
   Injectable,
   Logger,
 } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 
 import { REDIS, Redis, SENDGRID, Sendgrid } from '@delivery/providers';
 import { UsersAuthSignUpEventPayload, UsersTopic } from '@delivery/api';
-import { Environment, RMQMessage } from '@delivery/utils';
+import { RMQMessage } from '@delivery/utils';
 
 import { RabbitSubscribe } from '@golevelup/nestjs-rabbitmq';
 import { v4 as uuid } from 'uuid';
 import * as bcrypt from 'bcryptjs';
 import { inspect } from 'util';
-import { Config } from '../../config';
+
 import { PrismaService } from '../../prisma';
 
 @Injectable()
@@ -27,8 +26,7 @@ export class VerificationService {
     private readonly sendgrid: Sendgrid,
     @Inject(REDIS)
     private readonly redis: Redis,
-    private readonly prisma: PrismaService,
-    private readonly configService: ConfigService<Config>
+    private readonly prisma: PrismaService
   ) {}
 
   @RabbitSubscribe({
@@ -40,8 +38,6 @@ export class VerificationService {
     message: RMQMessage<UsersAuthSignUpEventPayload>
   ) {
     try {
-      const { environment } =
-        this.configService.get<Config['common']>('common');
       const {
         data: {
           user: { email, id },
@@ -55,22 +51,16 @@ export class VerificationService {
         EX: 60 * 60 * 24,
       });
 
-      if (environment === Environment.Development) {
-        this.logger.warn(
-          `Skipeed sending email verification to ${message.data.user.email} in development mode. Token: ${token}`
-        );
-      } else {
-        this.logger.log(
-          `Sending email verification to ${message.data.user.email}`
-        );
+      this.logger.log(
+        `Sending email verification to ${message.data.user.email}`
+      );
 
-        await this.sendgrid.send({
-          from: 'norberto.e.888@gmail.com',
-          to: email,
-          subject: 'Email Verification',
-          text: `Your token: ${token}\n Valid for 24 hours.`,
-        });
-      }
+      await this.sendgrid.send({
+        from: 'norberto.e.888@gmail.com',
+        to: email,
+        subject: 'Email Verification',
+        text: `Your token: ${token}\n Valid for 24 hours.`,
+      });
     } catch (error) {
       console.log('Error with sendEmailVerification:', inspect(error));
     }
