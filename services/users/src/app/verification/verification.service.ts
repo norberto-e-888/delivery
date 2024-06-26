@@ -5,6 +5,7 @@ import {
   Injectable,
   Logger,
 } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 
 import {
   REDIS,
@@ -13,7 +14,7 @@ import {
   SendgridProviderType,
 } from '@delivery/providers';
 import { UsersAuthSignUpEventPayload, UsersTopic } from '@delivery/api';
-import { RMQMessage } from '@delivery/utils';
+import { Environment, RMQMessage } from '@delivery/utils';
 import { PRISMA } from '@delivery/providers';
 import { PrismaClient } from '@prisma/users';
 
@@ -21,6 +22,7 @@ import { RabbitSubscribe } from '@golevelup/nestjs-rabbitmq';
 import { v4 as uuid } from 'uuid';
 import * as bcrypt from 'bcryptjs';
 import { inspect } from 'util';
+import { Config } from '../../config';
 
 @Injectable()
 export class VerificationService {
@@ -32,7 +34,8 @@ export class VerificationService {
     @Inject(REDIS)
     private readonly redis: RedisProviderType,
     @Inject(PRISMA)
-    private readonly prisma: PrismaClient
+    private readonly prisma: PrismaClient,
+    private readonly configService: ConfigService<Config>
   ) {}
 
   @RabbitSubscribe({
@@ -44,10 +47,8 @@ export class VerificationService {
     message: RMQMessage<UsersAuthSignUpEventPayload>
   ) {
     try {
-      this.logger.log(
-        `Sending email verification to ${message.data.user.email}`
-      );
-
+      const { environment } =
+        this.configService.get<Config['common']>('common');
       const {
         data: {
           user: { email, id },
@@ -61,12 +62,22 @@ export class VerificationService {
         EX: 60 * 60 * 24,
       });
 
-      await this.sendgrid.send({
-        from: 'norberto.e.888@gmail.com',
-        to: email,
-        subject: 'Email Verification',
-        text: `Your token: ${token}\n Valid for 24 hours.`,
-      });
+      if (environment === Environment.Development) {
+        this.logger.warn(
+          `Skipeed sending email verification to ${message.data.user.email} in development mode\nToken: ${token}`
+        );
+      } else {
+        this.logger.log(
+          `Sending email verification to ${message.data.user.email}`
+        );
+
+        await this.sendgrid.send({
+          from: 'norberto.e.888@gmail.com',
+          to: email,
+          subject: 'Email Verification',
+          text: `Your token: ${token}\n Valid for 24 hours.`,
+        });
+      }
     } catch (error) {
       console.log('Error with sendEmailVerification:', inspect(error));
     }
@@ -105,10 +116,10 @@ export class VerificationService {
     this.redis
       .del(`email-verification-token:${userId}`)
       .then(() => {
-        console.log(`Deleted email-verification-token:${userId}`);
+        this.logger.verbose(`Deleted email-verification-token:${userId}`);
       })
       .catch((error) => {
-        console.log(
+        this.logger.warn(
           `Error deleting email-verification-token:${userId}\n`,
           inspect(error)
         );

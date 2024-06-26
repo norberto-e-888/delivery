@@ -20,7 +20,7 @@ async function bootstrap() {
   app.use(cookieParser());
 
   const configService = app.get(ConfigService<Config>);
-  const { port } = configService.get<Config['misc']>('misc');
+  const { port } = configService.get<Config['common']>('common');
 
   await app.listen(port);
 

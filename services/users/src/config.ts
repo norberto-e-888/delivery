@@ -10,11 +10,19 @@ import {
   PrismaConfig,
   prismaConfigJoiSchema,
 } from '@delivery/providers';
-import { CommonConfig, commonConfigJoiSchema } from '@delivery/utils';
+import {
+  CommonConfig,
+  commonConfigJoiSchema,
+  Environment,
+} from '@delivery/utils';
 import Joi from 'joi';
 
 export const loadConfig = () => {
   const config: Config = {
+    common: {
+      port: +process.env.PORT,
+      environment: process.env.NODE_ENV as Environment,
+    },
     jwt: {
       secret: process.env.AUTH_JWT_SECRET,
       accessTokenDuration: +process.env.AUTH_JWT_ACCESS_TOKEN_DURATION,
@@ -31,9 +39,6 @@ export const loadConfig = () => {
     },
     sendgrid: {
       apiKey: process.env.SENDGRID_API_KEY,
-    },
-    misc: {
-      port: +process.env.PORT,
     },
     maxSessions: +process.env.MAX_SESSIONS,
   };
