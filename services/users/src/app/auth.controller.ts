@@ -92,6 +92,8 @@ export class AuthController {
   async handleMe(@AccessTokenPayload() atp: AccessTokenPayload) {
     const user = await this.authService.findUserById(atp.id);
 
+    delete user.password;
+
     return {
       user,
     };
