@@ -1,5 +1,4 @@
 import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
 
 import {
   REDIS_PROVIDER_KEY,
@@ -8,13 +7,12 @@ import {
   SendgridProviderType,
 } from '@delivery/providers';
 import { UsersEventSignUpPayload, UsersTopic } from '@delivery/api';
-import { User } from '@delivery/models';
 
 import { RabbitSubscribe } from '@golevelup/nestjs-rabbitmq';
 import { v4 as uuid } from 'uuid';
 import * as bcrypt from 'bcryptjs';
-import { Model } from 'mongoose';
 import { inspect } from 'util';
+import { PrismaService } from '../prisma';
 
 @Injectable()
 export class EmailVerificationService {
@@ -23,8 +21,7 @@ export class EmailVerificationService {
     private readonly sendgrid: SendgridProviderType,
     @Inject(REDIS_PROVIDER_KEY)
     private readonly redis: RedisProviderType,
-    @InjectModel(User.name)
-    private readonly userModel: Model<User>
+    private readonly prisma: PrismaService
   ) {}
 
   @RabbitSubscribe({
@@ -74,13 +71,16 @@ export class EmailVerificationService {
       throw new HttpException('Invalid token', HttpStatus.BAD_REQUEST);
     }
 
-    const updatedUser = await this.userModel.findByIdAndUpdate(
-      userId,
-      {
+    const updatedUser = await this.prisma.user.update({
+      where: {
+        id: userId,
+      },
+      data: {
         isEmailVerified: true,
       },
-      { new: true }
-    );
+    });
+
+    delete updatedUser.password;
 
     this.redis
       .del(`email-verification-token:${userId}`)
@@ -94,6 +94,6 @@ export class EmailVerificationService {
         );
       });
 
-    return updatedUser.toObject();
+    return updatedUser;
   }
 }

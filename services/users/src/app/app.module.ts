@@ -1,11 +1,8 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { MongooseModule } from '@nestjs/mongoose';
-import { User, UserSchema } from '@delivery/models';
 import { AppOutboxPostgresModule } from '@delivery/outbox-postgres';
 import {
   AppJwtModule,
-  AppMongoModule,
   AppRabbitMQModule,
   AppRedisModule,
   AppSendgridModule,
@@ -23,16 +20,9 @@ import { AppPrismaModule } from '../prisma';
       isGlobal: true,
       load: [loadConfig],
     }),
-    MongooseModule.forFeature([
-      {
-        name: User.name,
-        schema: UserSchema,
-      },
-    ]),
     AppPrismaModule,
     AppOutboxPostgresModule,
     AppJwtModule,
-    AppMongoModule,
     AppRedisModule,
     AppRabbitMQModule.forRoot(UsersTopic),
     AppSendgridModule,

@@ -1,11 +1,9 @@
 import {
   JwtConfig,
-  MongoConfig,
   RMQConfig,
   RedisConfig,
   SendgridConfig,
   jwtConfigJoiSchema,
-  mongoConfigJoiSchema,
   redisConfigJoiSchema,
   rmqConfigJoiSchema,
   sendgridConfigJoiSchema,
@@ -24,9 +22,6 @@ export const loadConfig = () => {
       secret: process.env.AUTH_JWT_SECRET,
       accessTokenDuration: +process.env.AUTH_JWT_ACCESS_TOKEN_DURATION,
       refreshTokenDuration: +process.env.AUTH_JWT_REFRESH_TOKEN_DURATION,
-    },
-    mongo: {
-      uri: process.env.MONGO_URI,
     },
     prisma: {
       url: process.env.POSTGRES_URL,
@@ -48,7 +43,6 @@ export const loadConfig = () => {
 
   const validationSchema = Joi.any()
     .concat(jwtConfigJoiSchema)
-    .concat(mongoConfigJoiSchema)
     .concat(prismaConfigJoiSchema)
     .concat(redisConfigJoiSchema)
     .concat(rmqConfigJoiSchema)
@@ -76,7 +70,6 @@ type ServiceConfig = {
 };
 
 export type Config = JwtConfig &
-  MongoConfig &
   PrismaConfig &
   RedisConfig &
   RMQConfig &
