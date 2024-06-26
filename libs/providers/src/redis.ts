@@ -31,7 +31,7 @@ export const redisProvider: Provider = {
   providers: [redisProvider],
   exports: [redisProvider],
 })
-export class AppRedisModule {}
+export class RedisModule {}
 
 export const redisConfigJoiSchema = Joi.object<RedisConfig>({
   redis: Joi.object<RedisConfig['redis']>({

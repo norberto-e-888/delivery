@@ -18,7 +18,7 @@ export const PRISMA = Symbol('PRISMA');
 
 @Global()
 @Module({})
-export class AppPrismaModule {
+export class PrismaModule {
   static forRootAsync<T extends Constructor>(
     options: PrismaModuleAsyncOptions<T>
   ): DynamicModule {
@@ -48,8 +48,8 @@ export class AppPrismaModule {
     };
 
     return {
-      module: AppPrismaModule,
-      imports: [AppPrismaModule],
+      module: PrismaModule,
+      imports: [PrismaModule],
       providers: [PrismaServiceProvider, PrismaTokenProvider],
       exports: [PrismaServiceProvider, PrismaTokenProvider],
     };

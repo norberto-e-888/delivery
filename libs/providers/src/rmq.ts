@@ -1,4 +1,4 @@
-import { RabbitMQModule } from '@golevelup/nestjs-rabbitmq';
+import { RabbitMQModule as GoLevelUpRabbitMQModule } from '@golevelup/nestjs-rabbitmq';
 import { DynamicModule, Global, Module } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
@@ -6,12 +6,12 @@ import Joi from 'joi';
 
 @Global()
 @Module({})
-export class AppRabbitMQModule {
+export class RabbitMQModule {
   static forRoot(topics: Record<string, string>): DynamicModule {
     return {
-      module: AppRabbitMQModule,
+      module: RabbitMQModule,
       imports: [
-        RabbitMQModule.forRootAsync(RabbitMQModule, {
+        GoLevelUpRabbitMQModule.forRootAsync(GoLevelUpRabbitMQModule, {
           inject: [ConfigService],
           useFactory: (configService: ConfigService) => {
             const rmqConfig = configService.get<RMQConfig['rmq']>('rmq');
@@ -35,7 +35,7 @@ export class AppRabbitMQModule {
           },
         }),
       ],
-      exports: [RabbitMQModule],
+      exports: [GoLevelUpRabbitMQModule],
     };
   }
 }

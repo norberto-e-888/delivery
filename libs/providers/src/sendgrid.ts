@@ -29,7 +29,7 @@ export const sendgridProvider: Provider = {
   providers: [sendgridProvider],
   exports: [sendgridProvider],
 })
-export class AppSendgridModule {}
+export class SendgridModule {}
 
 export const sendgridConfigJoiSchema = Joi.object<SendgridConfig>({
   sendgrid: Joi.object<SendgridConfig['sendgrid']>({

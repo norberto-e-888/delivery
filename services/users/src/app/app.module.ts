@@ -2,10 +2,10 @@ import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import {
   JwtModule,
-  AppPrismaModule,
-  AppRabbitMQModule,
-  AppRedisModule,
-  AppSendgridModule,
+  PrismaModule,
+  RabbitMQModule,
+  RedisModule,
+  SendgridModule,
 } from '@delivery/providers';
 import { AppOutboxPrismaModule } from '@delivery/outbox-prisma';
 import { UsersTopic } from '@delivery/api';
@@ -21,7 +21,7 @@ import { PrismaService } from '../prisma';
       isGlobal: true,
       load: [loadConfig],
     }),
-    AppPrismaModule.forRootAsync({
+    PrismaModule.forRootAsync({
       inject: [ConfigService],
       PrismaService,
       useFactory: (config: ConfigService<Config>) => {
@@ -33,9 +33,9 @@ import { PrismaService } from '../prisma';
     }),
     AppOutboxPrismaModule,
     JwtModule,
-    AppRedisModule,
-    AppRabbitMQModule.forRoot(UsersTopic),
-    AppSendgridModule,
+    RedisModule,
+    RabbitMQModule.forRoot(UsersTopic),
+    SendgridModule,
     AuthModule,
     VerificationModule,
   ],
