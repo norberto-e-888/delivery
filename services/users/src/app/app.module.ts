@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import {
-  AppJwtModule,
+  JwtModule,
   AppPrismaModule,
   AppRabbitMQModule,
   AppRedisModule,
@@ -32,7 +32,7 @@ import { PrismaService } from '../prisma';
       },
     }),
     AppOutboxPrismaModule,
-    AppJwtModule,
+    JwtModule,
     AppRedisModule,
     AppRabbitMQModule.forRoot(UsersTopic),
     AppSendgridModule,

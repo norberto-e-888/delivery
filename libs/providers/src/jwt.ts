@@ -1,14 +1,13 @@
 import { Global, Module } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { JwtModule } from '@nestjs/jwt';
+import { JwtModule as NestJsJwtModule } from '@nestjs/jwt';
 
 import Joi from 'joi';
-import { AppRedisModule } from './redis';
 
 @Global()
 @Module({
   imports: [
-    JwtModule.registerAsync({
+    NestJsJwtModule.registerAsync({
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => {
         const jwtConfig = configService.get<JwtConfig['jwt']>('jwt');
@@ -27,11 +26,10 @@ import { AppRedisModule } from './redis';
         };
       },
     }),
-    AppRedisModule,
   ],
-  exports: [JwtModule],
+  exports: [NestJsJwtModule],
 })
-export class AppJwtModule {}
+export class JwtModule {}
 
 export const jwtConfigJoiSchema = Joi.object<JwtConfig>({
   jwt: Joi.object<JwtConfig['jwt']>({
