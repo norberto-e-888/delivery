@@ -12,7 +12,7 @@ import { RabbitSubscribe } from '@golevelup/nestjs-rabbitmq';
 import { v4 as uuid } from 'uuid';
 import * as bcrypt from 'bcryptjs';
 import { inspect } from 'util';
-import { PrismaService } from '../prisma';
+import { PrismaService } from '../../prisma';
 import { RMQMessage } from '@delivery/utils';
 
 @Injectable()
@@ -59,7 +59,7 @@ export class EmailVerificationService {
     }
   }
 
-  async verifyEmailToken(userId: string, token: string) {
+  async verifyEmail(userId: string, token: string) {
     const hashedToken = await this.redis.get(
       `email-verification-token:${userId}`
     );

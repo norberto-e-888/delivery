@@ -10,10 +10,9 @@ import {
 import { UsersTopic } from '@delivery/api';
 
 import { loadConfig } from '../config';
-import { EmailVerificationService } from './email-verification.service';
-import { AuthService } from './auth.service';
 import { AppPrismaModule } from '../prisma';
-import { AuthController } from './auth.controller';
+import { AuthModule } from './auth/auth.module';
+import { VerificationModule } from './verification/verification.module';
 
 @Module({
   imports: [
@@ -27,8 +26,8 @@ import { AuthController } from './auth.controller';
     AppRedisModule,
     AppRabbitMQModule.forRoot(UsersTopic),
     AppSendgridModule,
+    AuthModule,
+    VerificationModule,
   ],
-  providers: [AuthService, EmailVerificationService],
-  controllers: [AuthController],
 })
 export class AppModule {}

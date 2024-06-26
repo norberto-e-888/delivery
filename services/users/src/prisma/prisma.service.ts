@@ -24,3 +24,29 @@ export class PrismaService
     await this.$disconnect();
   }
 }
+
+/* 
+function createPrismaService<T extends typeof PrismaClient>(BaseClass: T) {
+  @Injectable()
+  class PrismaService extends BaseClass implements OnModuleInit, OnModuleDestroy {
+    constructor(url: string) {
+      super({
+        datasources: {
+          db: {
+            url,
+          },
+        },
+      });
+    }
+
+    async onModuleInit() {
+      await this.$connect();
+    }
+
+    async onModuleDestroy() {
+      await this.$disconnect();
+    }
+  }
+
+  return PrismaService;
+} */
