@@ -6,7 +6,7 @@ import {
   UsersAuthSignUpBody,
 } from '@delivery/api';
 import { AccessTokenPayload, IsLoggedIn, JwtCookie } from '@delivery/auth';
-import { Cookie } from '@delivery/utils';
+import { Cookie, Environment } from '@delivery/utils';
 
 import { Response, CookieOptions } from 'express';
 
@@ -16,7 +16,7 @@ import { PrismaService } from '../../prisma';
 const COOKIE_OPTIONS: CookieOptions = {
   httpOnly: true,
   sameSite: 'strict',
-  secure: process.env.NODE_ENV === 'production',
+  secure: process.env.NODE_ENV === Environment.Production,
   maxAge: +process.env.AUTH_JWT_REFRESH_TOKEN_DURATION * 1000,
 };
 
