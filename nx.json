@@ -48,5 +48,6 @@
         "services/messaging-e2e/**/*"
       ]
     }
-  ]
+  ],
+  "nxCloudAccessToken": "Yjk0ZjQ1ZGUtOWU0Ny00ZTRkLTg1ZGYtODI2MmIxMjAzNzJkfHJlYWQtd3JpdGU="
 }
