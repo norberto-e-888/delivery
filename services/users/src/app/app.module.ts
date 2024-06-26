@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { PrismaClient } from '@prisma/users';
 import {
   AppJwtModule,
   AppPrismaModule,
@@ -7,13 +8,12 @@ import {
   AppRedisModule,
   AppSendgridModule,
 } from '@delivery/providers';
+import { AppOutboxPostgresModule } from '@delivery/outbox-postgres';
 import { UsersTopic } from '@delivery/api';
-import { PrismaClient } from '@prisma/users';
 
 import { Config, loadConfig } from '../config';
 import { AuthModule } from './auth/auth.module';
 import { VerificationModule } from './verification/verification.module';
-import { AppOutboxPostgresModule } from '@delivery/outbox-postgres';
 
 @Module({
   imports: [
