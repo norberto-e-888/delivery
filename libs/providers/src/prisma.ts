@@ -9,6 +9,7 @@ import {
   OnModuleDestroy,
   Injectable,
 } from '@nestjs/common';
+import Joi from 'joi';
 
 export const PRISMA = Symbol('PRISMA');
 
@@ -67,6 +68,18 @@ function createPrismaService<T extends new (...args: any[]) => any>(
 
   return PrismaService;
 }
+
+export const prismaConfigJoiSchema = Joi.object<PrismaConfig>({
+  prisma: Joi.object<PrismaConfig['prisma']>({
+    url: Joi.string().required(),
+  }).required(),
+});
+
+export type PrismaConfig = {
+  prisma: {
+    url: string;
+  };
+};
 
 interface PrismaModuleOptions {
   databaseUrl: string;

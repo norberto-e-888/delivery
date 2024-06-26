@@ -7,13 +7,10 @@ import {
   redisConfigJoiSchema,
   rmqConfigJoiSchema,
   sendgridConfigJoiSchema,
-} from '@delivery/providers';
-import {
-  CommonConfig,
-  commonConfigJoiSchema,
   PrismaConfig,
   prismaConfigJoiSchema,
-} from '@delivery/utils';
+} from '@delivery/providers';
+import { CommonConfig, commonConfigJoiSchema } from '@delivery/utils';
 import Joi from 'joi';
 
 export const loadConfig = () => {
