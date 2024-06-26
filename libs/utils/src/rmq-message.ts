@@ -3,5 +3,5 @@ export interface RMQMessage<D> {
   aggregate: {
     entityId: string;
     version: number;
-  };
+  } | null;
 }
