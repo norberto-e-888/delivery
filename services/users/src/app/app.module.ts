@@ -8,7 +8,7 @@ import {
   AppRedisModule,
   AppSendgridModule,
 } from '@delivery/providers';
-import { AppOutboxPostgresModule } from '@delivery/outbox-postgres';
+import { AppOutboxPostgresModule } from '@delivery/outbox-prisma';
 import { UsersTopic } from '@delivery/api';
 
 import { Config, loadConfig } from '../config';

@@ -17,7 +17,7 @@
     "paths": {
       "@delivery/api": ["libs/api/src/index.ts"],
       "@delivery/models": ["libs/models/src/index.ts"],
-      "@delivery/outbox-postgres": ["libs/outbox-postgres/src/index.ts"],
+      "@delivery/outbox-prisma": ["libs/outbox-prisma/src/index.ts"],
       "@delivery/providers": ["libs/providers/src/index.ts"],
       "@delivery/utils": ["libs/utils/src/index.ts"]
     }

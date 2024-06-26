@@ -20,7 +20,7 @@ import * as bcrypt from 'bcryptjs';
 import { v4 as uuid } from 'uuid';
 
 import { Config } from '../../config';
-import { OutboxPostgresService } from '@delivery/outbox-postgres';
+import { OutboxPostgresService } from '@delivery/outbox-prisma';
 import { PrismaClient } from '@prisma/client';
 
 @Injectable()
