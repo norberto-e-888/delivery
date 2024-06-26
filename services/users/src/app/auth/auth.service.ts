@@ -50,7 +50,7 @@ export class AuthService {
         }
 
         const hashedPassword = await bcrypt.hash(dto.password, 12);
-        const newUser = await prisma.passwordSafe.user.create({
+        const newUser = await prisma.extended.user.create({
           data: {
             name: dto.name,
             email: dto.email,
@@ -81,7 +81,7 @@ export class AuthService {
   }
 
   async signIn(dto: UsersAuthSignInBody): Promise<AuthenticatedResponse> {
-    const existingUser = await this.prisma.passwordSafe.user.findUnique({
+    const existingUser = await this.prisma.extended.user.findUnique({
       where: {
         email: dto.email,
       },

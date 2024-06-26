@@ -85,7 +85,7 @@ export class VerificationService {
       throw new HttpException('Invalid token', HttpStatus.BAD_REQUEST);
     }
 
-    const updatedUser = await this.prisma.passwordSafe.user.update({
+    const updatedUser = await this.prisma.extended.user.update({
       where: {
         id: userId,
       },

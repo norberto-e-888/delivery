@@ -5,7 +5,7 @@ export class PrismaService
   extends PrismaClient
   implements OnModuleInit, OnModuleDestroy
 {
-  get passwordSafe() {
+  get extended() {
     return this.$extends({
       result: {
         user: {

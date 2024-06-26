@@ -104,7 +104,7 @@ export class AuthController {
   @UseGuards(IsLoggedIn)
   @Get(UsersAuthEndpoint.Me)
   async handleMe(@AccessTokenPayload() atp: AccessTokenPayload) {
-    const user = await this.prisma.passwordSafe.user
+    const user = await this.prisma.extended.user
       .findUniqueOrThrow({
         where: {
           id: atp.id,
