@@ -9,7 +9,7 @@ export const OUTBOX_POSTGRES_PRISMA_SERVICE_KEY = Symbol(
 );
 
 @Injectable()
-export class OutboxPostgresService {
+export class OutboxPostgresService<C> {
   private readonly logger = new Logger(OutboxPostgresService.name);
 
   constructor(
@@ -18,7 +18,7 @@ export class OutboxPostgresService {
     private readonly commandBus: CommandBus
   ) {}
 
-  async publish<T, C>(
+  async publish<T>(
     writes: (transaction: C) => Promise<T>,
     message: {
       exchange: string;

@@ -12,7 +12,7 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { JwtModule, JwtService } from '@nestjs/jwt';
 
-import { UserRole } from '@delivery/models';
+import { UserRole } from '@prisma/users';
 
 import Joi from 'joi';
 import { Request } from 'express';

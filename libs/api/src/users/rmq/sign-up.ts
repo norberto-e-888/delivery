@@ -1,4 +1,4 @@
-import { User } from '@delivery/models';
+import { User } from '@prisma/users';
 import { RoutingKeyGenerators } from '@delivery/utils';
 
 export type UsersEventSignUpPayload = {

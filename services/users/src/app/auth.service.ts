@@ -9,7 +9,7 @@ import {
   UsersTopic,
   usersEventSignUpRoutingKeyGenerators,
 } from '@delivery/api';
-import { USERS_COLLECTION, User } from '@delivery/models';
+import { User } from '@prisma/users';
 import { OutboxService } from '@delivery/outbox';
 import {
   AccessTokenPayload,
@@ -22,24 +22,30 @@ import * as bcrypt from 'bcryptjs';
 import { v4 as uuid } from 'uuid';
 
 import { Config } from '../config';
+import { PrismaService } from '../prisma';
+import { OutboxPostgresService } from '@delivery/outbox-postgres';
 
 @Injectable()
 export class AuthService {
   constructor(
-    @InjectModel(User.name)
+    private readonly prisma: PrismaService,
+    @InjectModel('User')
     private readonly userModel: Model<User>,
     @Inject(REDIS_PROVIDER_KEY)
     private readonly redis: RedisProviderType,
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService<Config>,
-    private readonly outboxService: OutboxService
+    private readonly outboxService: OutboxService,
+    private readonly outboxPostgresService: OutboxPostgresService<PrismaService>
   ) {}
 
   async signUp(dto: UsersSignUpBody): Promise<AuthenticatedResponse> {
-    const newUser = await this.outboxService.publish(
-      async (session) => {
-        const existingUser = await this.userModel.findOne({
-          email: dto.email,
+    const newUser = await this.outboxPostgresService.publish(
+      async (prisma) => {
+        const existingUser = await prisma.user.findUnique({
+          where: {
+            email: dto.email,
+          },
         });
 
         if (existingUser) {
@@ -50,19 +56,15 @@ export class AuthService {
         }
 
         const hashedPassword = await bcrypt.hash(dto.password, 12);
-        const [newUser] = await this.userModel.create(
-          {
-            firstName: dto.firstName,
-            lastName: dto.lastName,
+        const newUser = await prisma.user.create({
+          data: {
+            name: `${dto.firstName} ${dto.lastName}`,
             email: dto.email,
             password: hashedPassword,
           },
-          {
-            session,
-          }
-        );
+        });
 
-        return newUser.toObject();
+        return newUser;
       },
       {
         exchange: UsersTopic.SignUp,
@@ -73,7 +75,6 @@ export class AuthService {
           user,
         }),
         aggregate: {
-          collection: USERS_COLLECTION,
           entityIdKey: 'user.id',
         },
       }
