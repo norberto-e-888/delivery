@@ -1,4 +1,10 @@
-import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
+import {
+  HttpException,
+  HttpStatus,
+  Inject,
+  Injectable,
+  Logger,
+} from '@nestjs/common';
 
 import {
   REDIS_PROVIDER_KEY,
@@ -17,12 +23,15 @@ import { RMQMessage } from '@delivery/utils';
 
 @Injectable()
 export class EmailVerificationService {
+  private readonly logger = new Logger(EmailVerificationService.name);
+
   constructor(
     @Inject(SENDGRID_PROVIDER_KEY)
     private readonly sendgrid: SendgridProviderType,
     @Inject(REDIS_PROVIDER_KEY)
     private readonly redis: RedisProviderType,
-    private readonly prisma: PrismaService
+    @Inject(PrismaService)
+    private readonly prisma: (typeof PrismaService)['prototype']
   ) {}
 
   @RabbitSubscribe({
@@ -34,7 +43,10 @@ export class EmailVerificationService {
     message: RMQMessage<UsersEventSignUpPayload>
   ) {
     try {
-      console.log(`Sending email verification to ${message.data.user.email}`);
+      this.logger.log(
+        `Sending email verification to ${message.data.user.email}`
+      );
+
       const {
         data: {
           user: { email, id },

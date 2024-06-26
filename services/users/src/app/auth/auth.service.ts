@@ -25,12 +25,15 @@ import { OutboxPostgresService } from '@delivery/outbox-postgres';
 @Injectable()
 export class AuthService {
   constructor(
-    private readonly prisma: PrismaService,
+    @Inject(PrismaService)
+    private readonly prisma: (typeof PrismaService)['prototype'],
     @Inject(REDIS_PROVIDER_KEY)
     private readonly redis: RedisProviderType,
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService<Config>,
-    private readonly outboxPostgresService: OutboxPostgresService<PrismaService>
+    private readonly outboxPostgresService: OutboxPostgresService<
+      (typeof PrismaService)['prototype']
+    >
   ) {}
 
   async signUp(dto: UsersSignUpBody): Promise<AuthenticatedResponse> {

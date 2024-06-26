@@ -1,42 +1,16 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Injectable, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
-import { PrismaClient } from '@prisma/users';
 
-@Injectable()
-export class PrismaService
-  extends PrismaClient
-  implements OnModuleInit, OnModuleDestroy
-{
-  constructor(url: string) {
-    super({
-      datasources: {
-        db: {
-          url,
-        },
-      },
-    });
-  }
-
-  async onModuleInit() {
-    await this.$connect();
-  }
-
-  async onModuleDestroy() {
-    await this.$disconnect();
-  }
-}
-
-/* 
-function createPrismaService<T extends typeof PrismaClient>(BaseClass: T) {
+export function createPrismaService<T extends new (...args: any[]) => any>(
+  BaseClass: T
+) {
   @Injectable()
-  class PrismaService extends BaseClass implements OnModuleInit, OnModuleDestroy {
-    constructor(url: string) {
-      super({
-        datasources: {
-          db: {
-            url,
-          },
-        },
-      });
+  class PrismaService
+    extends BaseClass
+    implements OnModuleInit, OnModuleDestroy
+  {
+    constructor(...args: any[]) {
+      super(args[0]);
     }
 
     async onModuleInit() {
@@ -49,4 +23,4 @@ function createPrismaService<T extends typeof PrismaClient>(BaseClass: T) {
   }
 
   return PrismaService;
-} */
+}
