@@ -7,7 +7,7 @@ import {
   Inject,
   createParamDecorator,
 } from '@nestjs/common';
-import { REDIS, RedisProviderType } from '@delivery/providers';
+import { REDIS, Redis } from '@delivery/providers';
 import { Reflector } from '@nestjs/core';
 import { JwtService } from '@nestjs/jwt';
 import { UserRole } from '@prisma/users';
@@ -20,7 +20,7 @@ export class IsLoggedIn implements CanActivate {
     private readonly reflector: Reflector,
     private readonly jwtService: JwtService,
     @Inject(REDIS)
-    private readonly redis: RedisProviderType
+    private readonly redis: Redis
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {

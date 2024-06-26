@@ -43,6 +43,6 @@ export type RedisConfig = {
   redis: { url: string };
 };
 
-export type RedisProviderType = ReturnType<typeof createClient>;
+export type Redis = ReturnType<typeof createClient>;
 
-export type RedisMulti = ReturnType<RedisProviderType['multi']>;
+export type RedisMulti = ReturnType<Redis['multi']>;

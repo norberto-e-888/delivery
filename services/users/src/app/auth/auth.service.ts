@@ -9,7 +9,7 @@ import {
   usersAuthSignUpEventRoutingKeyGenerators,
 } from '@delivery/api';
 import { User } from '@prisma/users';
-import { PRISMA, REDIS, RedisProviderType } from '@delivery/providers';
+import { PRISMA, REDIS, Redis } from '@delivery/providers';
 import { AccessTokenPayload } from '@delivery/auth';
 import { OutboxPrismaService } from '@delivery/outbox-prisma';
 import { PrismaClient } from '@prisma/users';
@@ -25,7 +25,7 @@ export class AuthService {
     @Inject(PRISMA)
     private readonly prisma: PrismaClient,
     @Inject(REDIS)
-    private readonly redis: RedisProviderType,
+    private readonly redis: Redis,
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService<Config>,
     private readonly outboxPostgresService: OutboxPrismaService<PrismaClient>

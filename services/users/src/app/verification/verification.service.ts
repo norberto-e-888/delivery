@@ -7,12 +7,7 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
-import {
-  REDIS,
-  RedisProviderType,
-  SENDGRID,
-  SendgridProviderType,
-} from '@delivery/providers';
+import { REDIS, Redis, SENDGRID, Sendgrid } from '@delivery/providers';
 import { UsersAuthSignUpEventPayload, UsersTopic } from '@delivery/api';
 import { Environment, RMQMessage } from '@delivery/utils';
 import { PRISMA } from '@delivery/providers';
@@ -30,9 +25,9 @@ export class VerificationService {
 
   constructor(
     @Inject(SENDGRID)
-    private readonly sendgrid: SendgridProviderType,
+    private readonly sendgrid: Sendgrid,
     @Inject(REDIS)
-    private readonly redis: RedisProviderType,
+    private readonly redis: Redis,
     @Inject(PRISMA)
     private readonly prisma: PrismaClient,
     private readonly configService: ConfigService<Config>

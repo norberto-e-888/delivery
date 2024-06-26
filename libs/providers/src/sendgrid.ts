@@ -41,4 +41,4 @@ export type SendgridConfig = {
   sendgrid: { apiKey: string };
 };
 
-export type SendgridProviderType = typeof sendgrid;
+export type Sendgrid = typeof sendgrid;
