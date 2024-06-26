@@ -23,8 +23,8 @@ import * as bcrypt from 'bcryptjs';
 import { inspect } from 'util';
 
 @Injectable()
-export class EmailVerificationService {
-  private readonly logger = new Logger(EmailVerificationService.name);
+export class VerificationService {
+  private readonly logger = new Logger(VerificationService.name);
 
   constructor(
     @Inject(SENDGRID)
@@ -72,7 +72,8 @@ export class EmailVerificationService {
     }
   }
 
-  async verifyEmail(userId: string, token: string) {
+  async verifyEmail(dto: { userId: string; token: string }) {
+    const { userId, token } = dto;
     const hashedToken = await this.redis.get(
       `email-verification-token:${userId}`
     );
