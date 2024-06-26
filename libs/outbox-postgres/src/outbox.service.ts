@@ -133,6 +133,13 @@ export interface PrismaTransactionClient {
     }) => Promise<Outbox>;
   };
   outboxAggregate: {
+    create: (args: {
+      data: {
+        outboxId: string;
+        entityId: string;
+        version: number;
+      };
+    }) => Promise<OutboxAggregate>;
     findFirst: (args: {
       where: {
         entityId: string;
@@ -141,21 +148,6 @@ export interface PrismaTransactionClient {
         version: 'desc';
       };
     }) => Promise<OutboxAggregate | null>;
-    update: (args: {
-      where: {
-        outboxId: string;
-      };
-      data: {
-        version: number;
-      };
-    }) => Promise<OutboxAggregate>;
-    create: (args: {
-      data: {
-        outboxId: string;
-        entityId: string;
-        version: number;
-      };
-    }) => Promise<OutboxAggregate>;
   };
 }
 
