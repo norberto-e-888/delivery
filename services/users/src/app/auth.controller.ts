@@ -1,5 +1,5 @@
 import { UsersEndpoint, UsersSignInBody, UsersSignUpBody } from '@delivery/api';
-import { Body, Controller, Post, Res, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Post, Res, UseGuards } from '@nestjs/common';
 
 import { Response, CookieOptions } from 'express';
 
@@ -88,7 +88,7 @@ export class AuthController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Post(UsersEndpoint.Me)
+  @Get(UsersEndpoint.Me)
   async handleMe(@AccessTokenPayload() atp: AccessTokenPayload) {
     const user = await this.authService.findUserById(atp.id);
 
