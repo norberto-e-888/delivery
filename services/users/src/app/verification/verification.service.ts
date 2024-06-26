@@ -64,7 +64,7 @@ export class VerificationService {
 
       if (environment === Environment.Development) {
         this.logger.warn(
-          `Skipeed sending email verification to ${message.data.user.email} in development mode\nToken: ${token}`
+          `Skipeed sending email verification to ${message.data.user.email} in development mode. Token: ${token}`
         );
       } else {
         this.logger.log(
