@@ -87,9 +87,9 @@ interface PrismaModuleOptions {
 
 interface PrismaModuleAsyncOptions<T extends new (...args: any[]) => any>
   extends ModuleMetadata {
+  inject?: any[];
   PrismaClientClass: T;
   useFactory: (
     ...args: any[]
   ) => Promise<PrismaModuleOptions> | PrismaModuleOptions;
-  inject?: any[];
 }
