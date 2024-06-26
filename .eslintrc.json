@@ -18,7 +18,8 @@
               }
             ]
           }
-        ]
+        ],
+        "@nx/workspace-no-this-prisma-user": "error"
       }
     },
     {

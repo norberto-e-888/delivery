@@ -33,7 +33,7 @@ export class AuthService {
   async signUp(dto: UsersAuthSignUpBody): Promise<AuthenticatedResponse> {
     const newUser = await this.outboxPrismaService.publish(
       async (prisma) => {
-        const existingUser = await prisma.user.findUnique({
+        const existingUser = await prisma.extended.user.findUnique({
           where: {
             email: dto.email,
           },
@@ -96,6 +96,9 @@ export class AuthService {
         where: {
           id: existingUser.id,
         },
+        select: {
+          password: true,
+        },
       })
       .catch(() => {
         throw new HttpException('User not found', HttpStatus.NOT_FOUND);
@@ -151,7 +154,7 @@ export class AuthService {
       const isTokenValid = token && (await bcrypt.compare(refreshToken, token));
 
       if (isTokenValid) {
-        const user = await this.prisma.user
+        const user = await this.prisma.extended.user
           .findUniqueOrThrow({
             where: {
               id: userId,
