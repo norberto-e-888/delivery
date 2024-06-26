@@ -35,6 +35,7 @@ export class OutboxPostgresService<C> {
   ) {
     let returnData: Awaited<T> | null = null;
     let outbox: Outbox | null = null;
+    let outboxAggregate: OutboxAggregate | null = null;
 
     try {
       await this.prisma.$transaction(async (prisma) => {
@@ -74,7 +75,7 @@ export class OutboxPostgresService<C> {
           });
 
           if (latestAggregate) {
-            await prisma.outboxAggregate.create({
+            outboxAggregate = await prisma.outboxAggregate.create({
               data: {
                 outboxId: latestAggregate.outboxId,
                 entityId,
@@ -82,7 +83,7 @@ export class OutboxPostgresService<C> {
               },
             });
           } else {
-            await prisma.outboxAggregate.create({
+            outboxAggregate = await prisma.outboxAggregate.create({
               data: {
                 outboxId: outbox.id,
                 entityId,
@@ -99,7 +100,12 @@ export class OutboxPostgresService<C> {
 
     if (outbox !== null) {
       this.commandBus
-        .execute(new PublishOutboxCommand(outbox))
+        .execute(
+          new PublishOutboxCommand({
+            outbox,
+            aggregate: outboxAggregate,
+          })
+        )
         .then(() => {
           this.logger.verbose(
             `Successfully executed PublishOutboxCommand for message with Id ${outbox?.id}`

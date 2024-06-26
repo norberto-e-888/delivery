@@ -13,6 +13,7 @@ import { v4 as uuid } from 'uuid';
 import * as bcrypt from 'bcryptjs';
 import { inspect } from 'util';
 import { PrismaService } from '../prisma';
+import { RMQMessage } from '@delivery/utils';
 
 @Injectable()
 export class EmailVerificationService {
@@ -29,11 +30,16 @@ export class EmailVerificationService {
     routingKey: '#',
     queue: 'users.send-email-verification',
   })
-  protected async sendEmailVerification(data: UsersEventSignUpPayload) {
+  protected async sendEmailVerification(
+    message: RMQMessage<UsersEventSignUpPayload>
+  ) {
     try {
+      console.log(`Sending email verification to ${message.data.user.email}`);
       const {
-        user: { email, id },
-      } = data;
+        data: {
+          user: { email, id },
+        },
+      } = message;
 
       const token = uuid().slice(0, 6);
       const hashedToken = await bcrypt.hash(token, 10);
