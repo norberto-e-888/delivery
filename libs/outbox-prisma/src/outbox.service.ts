@@ -28,7 +28,7 @@ export class OutboxPostgresService<C> {
         | ((result: T) => Promise<unknown>)
         | ((result: T) => unknown);
       aggregate?: {
-        entityIdKey: string;
+        genEntityIdKey: (result: T) => string;
       };
     } = {}
   ) {
@@ -38,9 +38,9 @@ export class OutboxPostgresService<C> {
 
     try {
       await this.prisma.$transaction(async (prisma) => {
-        const data = await writes(prisma as C);
-
         let payload: string;
+
+        const data = await writes(prisma as C);
 
         if (options?.transformPayload) {
           payload = JSON.stringify(await options.transformPayload(data));
@@ -59,10 +59,7 @@ export class OutboxPostgresService<C> {
         returnData = data;
 
         if (options.aggregate) {
-          const parsedPayload = JSON.parse(payload);
-          const entityId = options.aggregate.entityIdKey
-            .split('.')
-            .reduce((curr, key) => curr && curr[key], parsedPayload);
+          const entityId = options.aggregate.genEntityIdKey(data);
 
           if (typeof entityId !== 'string') {
             throw new Error(`Invalid entityId: ${entityId}`);

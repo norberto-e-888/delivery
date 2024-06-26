@@ -11,13 +11,13 @@ import {
 import { User } from '@prisma/users';
 import { PRISMA, REDIS, RedisProviderType } from '@delivery/providers';
 import { AccessTokenPayload } from '@delivery/auth';
+import { OutboxPostgresService } from '@delivery/outbox-prisma';
+import { PrismaClient } from '@prisma/users';
 
 import * as bcrypt from 'bcryptjs';
 import { v4 as uuid } from 'uuid';
 
 import { Config } from '../../config';
-import { OutboxPostgresService } from '@delivery/outbox-prisma';
-import { PrismaClient } from '@prisma/client';
 
 @Injectable()
 export class AuthService {
@@ -69,7 +69,7 @@ export class AuthService {
           user,
         }),
         aggregate: {
-          entityIdKey: 'user.id',
+          genEntityIdKey: (user) => user.id,
         },
       }
     );
