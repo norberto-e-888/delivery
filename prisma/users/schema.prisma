@@ -8,6 +8,25 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model Outbox {
+  id         String           @id @default(cuid())
+  exchange   String
+  routingKey String?
+  payload    String
+  aggregate  OutboxAggregate?
+  createdAt  DateTime         @default(now())
+}
+
+model OutboxAggregate {
+  outboxId  String   @id
+  outbox    Outbox   @relation(fields: [outboxId], references: [id])
+  entityId  String
+  version   Int
+  createdAt DateTime @default(now())
+
+  @@unique([entityId, version])
+}
+
 model User {
   id              String     @id @default(cuid())
   email           String     @unique

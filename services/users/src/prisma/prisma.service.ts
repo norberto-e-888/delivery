@@ -6,11 +6,11 @@ export class PrismaService
   extends PrismaClient
   implements OnModuleInit, OnModuleDestroy
 {
-  constructor() {
+  constructor(url: string) {
     super({
       datasources: {
         db: {
-          url: process.env.POSTGRES_URL,
+          url,
         },
       },
     });
