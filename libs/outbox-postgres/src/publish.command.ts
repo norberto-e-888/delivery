@@ -3,7 +3,8 @@ import { Inject, Logger } from '@nestjs/common';
 import { AmqpConnection } from '@golevelup/nestjs-rabbitmq';
 import { Outbox, OutboxAggregate } from '@delivery/utils';
 
-import { PRISMA, PrismaTransactionClient } from './outbox.service';
+import { PrismaTransactionClient } from './outbox.service';
+import { PRISMA } from '@delivery/providers';
 
 export class PublishOutboxCommand {
   constructor(

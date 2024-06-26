@@ -11,6 +11,7 @@ import {
 import { User } from '@prisma/users';
 import {
   AccessTokenPayload,
+  PRISMA,
   REDIS_PROVIDER_KEY,
   RedisProviderType,
 } from '@delivery/providers';
@@ -19,7 +20,7 @@ import * as bcrypt from 'bcryptjs';
 import { v4 as uuid } from 'uuid';
 
 import { Config } from '../../config';
-import { PRISMA, OutboxPostgresService } from '@delivery/outbox-postgres';
+import { OutboxPostgresService } from '@delivery/outbox-postgres';
 import { PrismaClient } from '@prisma/client';
 
 @Injectable()

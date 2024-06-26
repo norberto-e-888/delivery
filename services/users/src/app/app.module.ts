@@ -1,6 +1,5 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { AppOutboxPostgresModule } from '@delivery/outbox-postgres';
 import {
   AppJwtModule,
   AppPrismaModule,
@@ -14,6 +13,7 @@ import { PrismaClient } from '@prisma/users';
 import { Config, loadConfig } from '../config';
 import { AuthModule } from './auth/auth.module';
 import { VerificationModule } from './verification/verification.module';
+import { AppOutboxPostgresModule } from '@delivery/outbox-postgres';
 
 @Module({
   imports: [

@@ -1,10 +1,9 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { CommandBus } from '@nestjs/cqrs';
 import { Outbox, OutboxAggregate } from '@delivery/utils';
+import { PRISMA } from '@delivery/providers';
 import { inspect } from 'util';
 import { PublishOutboxCommand } from './publish.command';
-
-export const PRISMA = Symbol('PRISMA');
 
 @Injectable()
 export class OutboxPostgresService<C> {

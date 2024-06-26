@@ -9,20 +9,8 @@ import {
   OnModuleDestroy,
   Injectable,
 } from '@nestjs/common';
-import { AppOutboxPostgresModule, PRISMA } from '@delivery/outbox-postgres';
 
-interface PrismaModuleOptions {
-  databaseUrl: string;
-}
-
-interface PrismaModuleAsyncOptions<T extends new (...args: any[]) => any>
-  extends ModuleMetadata {
-  PrismaClientClass: T;
-  useFactory: (
-    ...args: any[]
-  ) => Promise<PrismaModuleOptions> | PrismaModuleOptions;
-  inject?: any[];
-}
+export const PRISMA = Symbol('PRISMA');
 
 @Global()
 @Module({})
@@ -49,7 +37,7 @@ export class AppPrismaModule {
 
     return {
       module: AppPrismaModule,
-      imports: [AppPrismaModule, AppOutboxPostgresModule],
+      imports: [AppPrismaModule],
       providers: [PrismaServiceProvider],
       exports: [PrismaServiceProvider],
     };
@@ -78,4 +66,17 @@ function createPrismaService<T extends new (...args: any[]) => any>(
   }
 
   return PrismaService;
+}
+
+interface PrismaModuleOptions {
+  databaseUrl: string;
+}
+
+interface PrismaModuleAsyncOptions<T extends new (...args: any[]) => any>
+  extends ModuleMetadata {
+  PrismaClientClass: T;
+  useFactory: (
+    ...args: any[]
+  ) => Promise<PrismaModuleOptions> | PrismaModuleOptions;
+  inject?: any[];
 }

@@ -14,7 +14,7 @@ import {
 } from '@delivery/providers';
 import { UsersEventSignUpPayload, UsersTopic } from '@delivery/api';
 import { RMQMessage } from '@delivery/utils';
-import { PRISMA } from '@delivery/outbox-postgres';
+import { PRISMA } from '@delivery/providers';
 import { PrismaClient } from '@prisma/users';
 
 import { RabbitSubscribe } from '@golevelup/nestjs-rabbitmq';
