@@ -11,7 +11,7 @@ import {
 import { User } from '@prisma/users';
 import { PRISMA, REDIS, RedisProviderType } from '@delivery/providers';
 import { AccessTokenPayload } from '@delivery/auth';
-import { OutboxPostgresService } from '@delivery/outbox-prisma';
+import { OutboxPrismaService } from '@delivery/outbox-prisma';
 import { PrismaClient } from '@prisma/users';
 
 import * as bcrypt from 'bcryptjs';
@@ -28,7 +28,7 @@ export class AuthService {
     private readonly redis: RedisProviderType,
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService<Config>,
-    private readonly outboxPostgresService: OutboxPostgresService<PrismaClient>
+    private readonly outboxPostgresService: OutboxPrismaService<PrismaClient>
   ) {}
 
   async signUp(dto: UsersAuthSignUpBody): Promise<AuthenticatedResponse> {
