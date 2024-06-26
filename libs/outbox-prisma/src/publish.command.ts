@@ -4,8 +4,7 @@ import { AmqpConnection } from '@golevelup/nestjs-rabbitmq';
 
 import { PRISMA } from '@delivery/providers';
 
-import { PrismaTransactionClient } from './outbox.service';
-import { Outbox, OutboxAggregate } from './types';
+import { Outbox, OutboxAggregate, PrismaClient } from './types';
 
 export class PublishOutboxCommand {
   constructor(
@@ -24,7 +23,7 @@ export class OutboxPublisherHandler
 
   constructor(
     @Inject(PRISMA)
-    private readonly prisma: PrismaTransactionClient,
+    private readonly prisma: PrismaClient,
     private readonly amqp: AmqpConnection
   ) {}
 
