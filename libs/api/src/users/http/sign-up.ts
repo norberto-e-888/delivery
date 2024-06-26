@@ -2,10 +2,7 @@ import { IsEmail, IsString } from 'class-validator';
 
 export class UsersSignUpBody {
   @IsString()
-  firstName!: string;
-
-  @IsString()
-  lastName!: string;
+  name!: string;
 
   @IsString()
   @IsEmail()
