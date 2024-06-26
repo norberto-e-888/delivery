@@ -1,10 +1,11 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { Inject, Logger } from '@nestjs/common';
 import { AmqpConnection } from '@golevelup/nestjs-rabbitmq';
-import { Outbox, OutboxAggregate } from '@delivery/utils';
+
+import { PRISMA } from '@delivery/providers';
 
 import { PrismaTransactionClient } from './outbox.service';
-import { PRISMA } from '@delivery/providers';
+import { Outbox, OutboxAggregate } from './types';
 
 export class PublishOutboxCommand {
   constructor(

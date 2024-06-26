@@ -1,8 +1,10 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { CommandBus } from '@nestjs/cqrs';
-import { Outbox, OutboxAggregate } from '@delivery/utils';
 import { PRISMA } from '@delivery/providers';
+
 import { inspect } from 'util';
+
+import { Outbox, OutboxAggregate } from './types';
 import { PublishOutboxCommand } from './publish.command';
 
 @Injectable()
