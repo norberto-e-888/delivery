@@ -33,7 +33,7 @@ export const sendgridProvider: Provider = {
           text: string;
         }) => {
           Logger.debug(
-            `Used mock sendgrid instance...\nEmail data:${JSON.stringify(
+            `Used mock sendgrid instance...\nEmail data: ${JSON.stringify(
               args
             )}`,
             'Sendgrid'
