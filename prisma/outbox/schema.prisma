@@ -1,13 +1,3 @@
-generator client {
-    provider = "prisma-client-js"
-    output   = "../../node_modules/@prisma/outbox"
-}
-
-datasource db {
-    provider = "postgresql"
-    url      = env("DATABASE_URL")
-}
-
 model Outbox {
     id         String           @id @default(cuid())
     exchange   String
