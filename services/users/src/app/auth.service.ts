@@ -64,6 +64,8 @@ export class AuthService {
           },
         });
 
+        delete newUser.password;
+
         return newUser;
       },
       {
@@ -87,8 +89,10 @@ export class AuthService {
   }
 
   async signIn(dto: UsersSignInBody): Promise<AuthenticatedResponse> {
-    const existingUser = await this.userModel.findOne({
-      email: dto.email,
+    const existingUser = await this.prisma.user.findUnique({
+      where: {
+        email: dto.email,
+      },
     });
 
     if (!existingUser) {
@@ -104,11 +108,11 @@ export class AuthService {
       throw new HttpException('Invalid credentials', HttpStatus.NOT_FOUND);
     }
 
-    const existingUserObj = existingUser.toObject();
+    delete existingUser.password;
 
     return {
-      user: existingUserObj,
-      tokens: await this.generateTokens(existingUserObj),
+      user: existingUser,
+      tokens: await this.generateTokens(existingUser),
     };
   }
 
