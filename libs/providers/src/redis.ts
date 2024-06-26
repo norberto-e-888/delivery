@@ -16,8 +16,6 @@ export const redisProvider: Provider = {
 
     const { url, username, password } = redisConfig;
 
-    console.log('REDIS URL:', url);
-
     const client = createClient({
       url,
       username,
