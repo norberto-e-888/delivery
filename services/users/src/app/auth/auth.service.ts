@@ -19,21 +19,19 @@ import * as bcrypt from 'bcryptjs';
 import { v4 as uuid } from 'uuid';
 
 import { Config } from '../../config';
-import { PrismaService } from '../../prisma';
-import { OutboxPostgresService } from '@delivery/outbox-postgres';
+import { PRISMA, OutboxPostgresService } from '@delivery/outbox-postgres';
+import { PrismaClient } from '@prisma/client';
 
 @Injectable()
 export class AuthService {
   constructor(
-    @Inject(PrismaService)
-    private readonly prisma: (typeof PrismaService)['prototype'],
+    @Inject(PRISMA)
+    private readonly prisma: PrismaClient,
     @Inject(REDIS_PROVIDER_KEY)
     private readonly redis: RedisProviderType,
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService<Config>,
-    private readonly outboxPostgresService: OutboxPostgresService<
-      (typeof PrismaService)['prototype']
-    >
+    private readonly outboxPostgresService: OutboxPostgresService<PrismaClient>
   ) {}
 
   async signUp(dto: UsersSignUpBody): Promise<AuthenticatedResponse> {

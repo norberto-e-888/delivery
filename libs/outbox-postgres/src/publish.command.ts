@@ -3,10 +3,7 @@ import { Inject, Logger } from '@nestjs/common';
 import { AmqpConnection } from '@golevelup/nestjs-rabbitmq';
 import { Outbox, OutboxAggregate } from '@delivery/utils';
 
-import {
-  OUTBOX_POSTGRES_PRISMA_SERVICE_KEY,
-  PrismaTransactionClient,
-} from './outbox.service';
+import { PRISMA, PrismaTransactionClient } from './outbox.service';
 
 export class PublishOutboxCommand {
   constructor(
@@ -24,7 +21,7 @@ export class OutboxPublisherHandler
   private readonly logger = new Logger(OutboxPublisherHandler.name);
 
   constructor(
-    @Inject(OUTBOX_POSTGRES_PRISMA_SERVICE_KEY)
+    @Inject(PRISMA)
     private readonly prisma: PrismaTransactionClient,
     private readonly amqp: AmqpConnection
   ) {}

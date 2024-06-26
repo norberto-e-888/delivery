@@ -1,16 +1,17 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AppOutboxPostgresModule } from '@delivery/outbox-postgres';
 import {
   AppJwtModule,
+  AppPrismaModule,
   AppRabbitMQModule,
   AppRedisModule,
   AppSendgridModule,
 } from '@delivery/providers';
 import { UsersTopic } from '@delivery/api';
+import { PrismaClient } from '@prisma/users';
 
-import { loadConfig } from '../config';
-import { AppPrismaModule } from '../prisma';
+import { Config, loadConfig } from '../config';
 import { AuthModule } from './auth/auth.module';
 import { VerificationModule } from './verification/verification.module';
 
@@ -20,7 +21,16 @@ import { VerificationModule } from './verification/verification.module';
       isGlobal: true,
       load: [loadConfig],
     }),
-    AppPrismaModule,
+    AppPrismaModule.forRootAsync({
+      inject: [ConfigService],
+      PrismaClientClass: PrismaClient,
+      useFactory: (config: ConfigService<Config>) => {
+        const { url } = config.get<Config['prisma']>('prisma');
+        return {
+          databaseUrl: url,
+        };
+      },
+    }),
     AppOutboxPostgresModule,
     AppJwtModule,
     AppRedisModule,

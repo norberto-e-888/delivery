@@ -4,16 +4,14 @@ import { Outbox, OutboxAggregate } from '@delivery/utils';
 import { inspect } from 'util';
 import { PublishOutboxCommand } from './publish.command';
 
-export const OUTBOX_POSTGRES_PRISMA_SERVICE_KEY = Symbol(
-  'OUTBOX_POSTGRES_PRISMA_SERVICE_KEY'
-);
+export const PRISMA = Symbol('PRISMA');
 
 @Injectable()
 export class OutboxPostgresService<C> {
   private readonly logger = new Logger(OutboxPostgresService.name);
 
   constructor(
-    @Inject(OUTBOX_POSTGRES_PRISMA_SERVICE_KEY)
+    @Inject(PRISMA)
     private readonly prisma: PrismaService,
     private readonly commandBus: CommandBus
   ) {}

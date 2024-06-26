@@ -13,13 +13,14 @@ import {
   SendgridProviderType,
 } from '@delivery/providers';
 import { UsersEventSignUpPayload, UsersTopic } from '@delivery/api';
+import { RMQMessage } from '@delivery/utils';
+import { PRISMA } from '@delivery/outbox-postgres';
+import { PrismaClient } from '@prisma/users';
 
 import { RabbitSubscribe } from '@golevelup/nestjs-rabbitmq';
 import { v4 as uuid } from 'uuid';
 import * as bcrypt from 'bcryptjs';
 import { inspect } from 'util';
-import { PrismaService } from '../../prisma';
-import { RMQMessage } from '@delivery/utils';
 
 @Injectable()
 export class EmailVerificationService {
@@ -30,8 +31,8 @@ export class EmailVerificationService {
     private readonly sendgrid: SendgridProviderType,
     @Inject(REDIS_PROVIDER_KEY)
     private readonly redis: RedisProviderType,
-    @Inject(PrismaService)
-    private readonly prisma: (typeof PrismaService)['prototype']
+    @Inject(PRISMA)
+    private readonly prisma: PrismaClient
   ) {}
 
   @RabbitSubscribe({
