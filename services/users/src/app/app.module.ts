@@ -2,7 +2,6 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 import { User, UserSchema } from '@delivery/models';
-import { AppOutboxModule } from '@delivery/outbox';
 import { AppOutboxPostgresModule } from '@delivery/outbox-postgres';
 import {
   AppJwtModule,
@@ -31,7 +30,6 @@ import { AppPrismaModule } from '../prisma';
       },
     ]),
     AppPrismaModule,
-    AppOutboxModule,
     AppOutboxPostgresModule,
     AppJwtModule,
     AppMongoModule,

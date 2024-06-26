@@ -1,6 +1,5 @@
 import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { InjectModel } from '@nestjs/mongoose';
 import { ConfigService } from '@nestjs/config';
 import {
   UsersEventSignUpPayload,
@@ -10,14 +9,12 @@ import {
   usersEventSignUpRoutingKeyGenerators,
 } from '@delivery/api';
 import { User } from '@prisma/users';
-import { OutboxService } from '@delivery/outbox';
 import {
   AccessTokenPayload,
   REDIS_PROVIDER_KEY,
   RedisProviderType,
 } from '@delivery/providers';
 
-import { Model } from 'mongoose';
 import * as bcrypt from 'bcryptjs';
 import { v4 as uuid } from 'uuid';
 
@@ -29,13 +26,10 @@ import { OutboxPostgresService } from '@delivery/outbox-postgres';
 export class AuthService {
   constructor(
     private readonly prisma: PrismaService,
-    @InjectModel('User')
-    private readonly userModel: Model<User>,
     @Inject(REDIS_PROVIDER_KEY)
     private readonly redis: RedisProviderType,
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService<Config>,
-    private readonly outboxService: OutboxService,
     private readonly outboxPostgresService: OutboxPostgresService<PrismaService>
   ) {}
 
@@ -178,7 +172,11 @@ export class AuthService {
   }
 
   async findUserById(id: string): Promise<User> {
-    const user = await this.userModel.findById(id);
+    const user = await this.prisma.user.findUnique({
+      where: {
+        id,
+      },
+    });
 
     if (!user) {
       throw new HttpException('User not found', HttpStatus.NOT_FOUND);
