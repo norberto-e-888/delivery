@@ -1,5 +1,5 @@
-export * from './sign-up';
+export * from './auth-sign-up';
 
 export enum UsersTopic {
-  SignUp = 'users.sign-up',
+  SignUp = 'users.auth.sign-up',
 }

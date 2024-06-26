@@ -2,11 +2,11 @@ import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import {
-  UsersEventSignUpPayload,
-  UsersSignInBody,
-  UsersSignUpBody,
+  UsersAuthSignUpEventPayload,
+  UsersAuthSignInBody,
+  UsersAuthSignUpBody,
   UsersTopic,
-  usersEventSignUpRoutingKeyGenerators,
+  usersAuthSignUpEventRoutingKeyGenerators,
 } from '@delivery/api';
 import { User } from '@prisma/users';
 import { PRISMA, REDIS, RedisProviderType } from '@delivery/providers';
@@ -31,7 +31,7 @@ export class AuthService {
     private readonly outboxPostgresService: OutboxPostgresService<PrismaClient>
   ) {}
 
-  async signUp(dto: UsersSignUpBody): Promise<AuthenticatedResponse> {
+  async signUp(dto: UsersAuthSignUpBody): Promise<AuthenticatedResponse> {
     const newUser = await this.outboxPostgresService.publish(
       async (prisma) => {
         const existingUser = await prisma.user.findUnique({
@@ -62,10 +62,10 @@ export class AuthService {
       },
       {
         exchange: UsersTopic.SignUp,
-        routingKey: usersEventSignUpRoutingKeyGenerators.producer(),
+        routingKey: usersAuthSignUpEventRoutingKeyGenerators.producer(),
       },
       {
-        transformPayload: (user): UsersEventSignUpPayload => ({
+        transformPayload: (user): UsersAuthSignUpEventPayload => ({
           user,
         }),
         aggregate: {
@@ -80,7 +80,7 @@ export class AuthService {
     };
   }
 
-  async signIn(dto: UsersSignInBody): Promise<AuthenticatedResponse> {
+  async signIn(dto: UsersAuthSignInBody): Promise<AuthenticatedResponse> {
     const existingUser = await this.prisma.user.findUnique({
       where: {
         email: dto.email,

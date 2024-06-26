@@ -12,7 +12,7 @@ import {
   SENDGRID,
   SendgridProviderType,
 } from '@delivery/providers';
-import { UsersEventSignUpPayload, UsersTopic } from '@delivery/api';
+import { UsersAuthSignUpEventPayload, UsersTopic } from '@delivery/api';
 import { RMQMessage } from '@delivery/utils';
 import { PRISMA } from '@delivery/providers';
 import { PrismaClient } from '@prisma/users';
@@ -41,7 +41,7 @@ export class EmailVerificationService {
     queue: 'users.send-email-verification',
   })
   protected async sendEmailVerification(
-    message: RMQMessage<UsersEventSignUpPayload>
+    message: RMQMessage<UsersAuthSignUpEventPayload>
   ) {
     try {
       this.logger.log(

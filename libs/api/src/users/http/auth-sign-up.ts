@@ -2,7 +2,7 @@ import { Transform } from 'class-transformer';
 import { IsEmail, IsString } from 'class-validator';
 import { lowercase, trim } from '@delivery/utils';
 
-export class UsersSignUpBody {
+export class UsersAuthSignUpBody {
   @Transform(lowercase)
   @Transform(trim)
   @IsString()

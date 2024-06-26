@@ -1,8 +1,8 @@
 import {
   UsersAuthEndpoint,
   UsersModule,
-  UsersSignInBody,
-  UsersSignUpBody,
+  UsersAuthSignInBody,
+  UsersAuthSignUpBody,
 } from '@delivery/api';
 import { Body, Controller, Get, Post, Res, UseGuards } from '@nestjs/common';
 
@@ -25,7 +25,7 @@ export class AuthController {
 
   @Post(UsersAuthEndpoint.SignUp)
   async handleSignUp(
-    @Body() body: UsersSignUpBody,
+    @Body() body: UsersAuthSignUpBody,
     @Res({ passthrough: true }) res: Response
   ) {
     const { tokens, user } = await this.authService.signUp(body);
@@ -40,7 +40,7 @@ export class AuthController {
 
   @Post(UsersAuthEndpoint.SignIn)
   async handleSignIn(
-    @Body() body: UsersSignInBody,
+    @Body() body: UsersAuthSignInBody,
     @Res({ passthrough: true }) res: Response
   ) {
     const { tokens, user } = await this.authService.signIn(body);

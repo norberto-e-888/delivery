@@ -1,5 +1,5 @@
-export * from './sign-in';
-export * from './sign-up';
+export * from './auth-sign-in';
+export * from './auth-sign-up';
 
 type Method = 'POST' | 'GET' | 'DELETE' | 'PATCH';
 

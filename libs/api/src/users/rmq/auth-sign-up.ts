@@ -1,11 +1,11 @@
 import { User } from '@prisma/users';
 import { RoutingKeyGenerators } from '@delivery/utils';
 
-export type UsersEventSignUpPayload = {
+export type UsersAuthSignUpEventPayload = {
   user: Omit<User, 'password'>;
 };
 
-export const usersEventSignUpRoutingKeyGenerators: RoutingKeyGenerators = {
+export const usersAuthSignUpEventRoutingKeyGenerators: RoutingKeyGenerators = {
   producer: () => '',
   consumer: () => '',
 };
