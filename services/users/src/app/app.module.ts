@@ -7,7 +7,7 @@ import {
   RedisModule,
   SendgridModule,
 } from '@delivery/providers';
-import { AppOutboxPrismaModule } from '@delivery/outbox-prisma';
+import { OutboxPrismaModule } from '@delivery/outbox-prisma';
 import { UsersTopic } from '@delivery/api';
 
 import { Config, loadConfig } from '../config';
@@ -31,7 +31,7 @@ import { PrismaService } from '../prisma';
         };
       },
     }),
-    AppOutboxPrismaModule,
+    OutboxPrismaModule,
     JwtModule,
     RedisModule,
     RabbitMQModule.forRoot(UsersTopic),
