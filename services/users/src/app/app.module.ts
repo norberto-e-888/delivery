@@ -14,7 +14,6 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AuthModule } from './auth/auth.module';
 import { Config, loadConfig } from './config';
 import { PrismaService } from './prisma';
-import { ReplayController } from './replay.controller';
 import { VerificationModule } from './verification/verification.module';
 
 @Module({
@@ -42,6 +41,5 @@ import { VerificationModule } from './verification/verification.module';
     AuthModule,
     VerificationModule,
   ],
-  controllers: [ReplayController],
 })
 export class AppModule {}
