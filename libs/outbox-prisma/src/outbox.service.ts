@@ -4,7 +4,7 @@ import { PRISMA } from '@delivery/providers';
 
 import { inspect } from 'util';
 
-import { Outbox, OutboxAggregate, PrismaService } from './types';
+import { OutboxPrisma, OutboxPrismaAggregate, PrismaService } from './types';
 import { PublishOutboxCommand } from './publish.command';
 
 @Injectable()
@@ -33,8 +33,8 @@ export class OutboxPrismaService<C> {
     } = {}
   ) {
     let returnData: Awaited<T> | null = null;
-    let outbox: Outbox | null = null;
-    let outboxAggregate: OutboxAggregate | null = null;
+    let outbox: OutboxPrisma | null = null;
+    let outboxAggregate: OutboxPrismaAggregate | null = null;
 
     try {
       await this.prisma.$transaction(async (prisma) => {
@@ -90,7 +90,9 @@ export class OutboxPrismaService<C> {
         }
       });
     } catch (error) {
-      this.logger.error(`Error with Outbox transaction: ${inspect(error)}`);
+      this.logger.error(
+        `Error with OutboxPrisma transaction: ${inspect(error)}`
+      );
       throw error;
     }
 
@@ -99,7 +101,7 @@ export class OutboxPrismaService<C> {
         .execute(
           new PublishOutboxCommand({
             outbox,
-            aggregate: outboxAggregate,
+            aggregate: outboxAggregate || undefined,
           })
         )
         .then(() => {

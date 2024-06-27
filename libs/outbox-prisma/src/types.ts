@@ -1,4 +1,6 @@
-export interface Outbox {
+import { RabbitMQMessageAggregate } from '@delivery/utils';
+
+export interface OutboxPrisma {
   id: string;
   exchange: string;
   routingKey: string | null;
@@ -6,10 +8,8 @@ export interface Outbox {
   createdAt: Date;
 }
 
-export interface OutboxAggregate {
+export interface OutboxPrismaAggregate extends RabbitMQMessageAggregate {
   outboxId: string;
-  entityId: string;
-  version: number;
   createdAt: Date;
 }
 
@@ -21,11 +21,11 @@ export interface PrismaClient {
         routingKey: string | null;
         payload: string;
       };
-    }) => Promise<Outbox>;
+    }) => Promise<OutboxPrisma>;
     update: (args: {
       where: { id: string };
       data: { isSent: boolean };
-    }) => Promise<Outbox>;
+    }) => Promise<OutboxPrisma>;
   };
   outboxAggregate: {
     create: (args: {
@@ -34,7 +34,7 @@ export interface PrismaClient {
         entityId: string;
         version: number;
       };
-    }) => Promise<OutboxAggregate>;
+    }) => Promise<OutboxPrismaAggregate>;
     findFirst: (args: {
       where: {
         entityId: string;
@@ -42,7 +42,7 @@ export interface PrismaClient {
       orderBy: {
         version: 'desc';
       };
-    }) => Promise<OutboxAggregate | null>;
+    }) => Promise<OutboxPrismaAggregate | null>;
   };
 }
 

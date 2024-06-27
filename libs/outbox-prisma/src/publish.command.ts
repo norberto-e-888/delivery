@@ -4,13 +4,14 @@ import { AmqpConnection } from '@golevelup/nestjs-rabbitmq';
 
 import { PRISMA } from '@delivery/providers';
 
-import { Outbox, OutboxAggregate, PrismaClient } from './types';
+import { OutboxPrisma, OutboxPrismaAggregate, PrismaClient } from './types';
+import { RabbitMQMessage } from '@delivery/utils';
 
 export class PublishOutboxCommand {
   constructor(
     public readonly message: {
-      outbox: Outbox;
-      aggregate: OutboxAggregate | null;
+      outbox: OutboxPrisma;
+      aggregate?: OutboxPrismaAggregate;
     }
   ) {}
 }
@@ -32,13 +33,15 @@ export class OutboxPrismaPublisher
       message: command.message,
     });
 
+    const message: RabbitMQMessage = {
+      aggregate: command.message.aggregate,
+      payload: JSON.parse(command.message.outbox.payload),
+    };
+
     this.amqp.publish(
       command.message.outbox.exchange,
       command.message.outbox.routingKey || '',
-      {
-        data: JSON.parse(command.message.outbox.payload),
-        aggregate: command.message.aggregate,
-      }
+      message
     );
 
     await this.prisma.outbox.update({
