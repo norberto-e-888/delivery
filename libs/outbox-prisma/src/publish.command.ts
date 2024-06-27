@@ -4,14 +4,12 @@ import { AmqpConnection } from '@golevelup/nestjs-rabbitmq';
 import { Inject, Logger } from '@nestjs/common';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 
-import { OutboxPrisma, OutboxPrismaAggregate, PrismaClient } from './types';
-
+import { OutboxPrisma, PrismaClient } from './types';
 
 export class PublishOutboxCommand {
   constructor(
     public readonly message: {
       outbox: OutboxPrisma;
-      aggregate?: OutboxPrismaAggregate;
     }
   ) {}
 }
@@ -29,26 +27,21 @@ export class OutboxPrismaPublisher
   ) {}
 
   async execute(command: PublishOutboxCommand) {
+    const {
+      message: { outbox },
+    } = command;
     this.logger.debug({
       message: command.message,
     });
 
     const message: RabbitMQMessage = {
-      aggregate: command.message.aggregate && {
-        entityId: command.message.aggregate.entityId,
-        version: command.message.aggregate.version,
-      },
-      payload: JSON.parse(command.message.outbox.payload),
+      aggregate: outbox.aggregate,
+      payload: JSON.parse(outbox.payload),
     };
 
-    this.amqp.publish(
-      command.message.outbox.exchange,
-      command.message.outbox.routingKey || '',
-      message
-    );
-
+    this.amqp.publish(outbox.exchange, outbox.routingKey || '', message);
     await this.prisma.outbox.update({
-      where: { id: command.message.outbox.id },
+      where: { id: outbox.id },
       data: { isSent: true },
     });
   }

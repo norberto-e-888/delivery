@@ -7,6 +7,7 @@
     "down": "docker-compose -f ./docker/compose.yaml down",
     "generate": "prisma generate --schema=./prisma/$SERVICE/schema.prisma",
     "migrate": "prisma migrate dev --schema=./prisma/$SERVICE/schema.prisma",
+    "migrate-create-only": "prisma migrate dev --schema=./prisma/$SERVICE/schema.prisma --create-only",
     "reset": "prisma migrate reset --schema=./prisma/$SERVICE/schema.prisma",
     "dockerize": "docker build -t $SERVICE-service -f ./docker/dockerfile.$SERVICE .",
     "fix-lint": "nx run-many --target=lint --all --fix"

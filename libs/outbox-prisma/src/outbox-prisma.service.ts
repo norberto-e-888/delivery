@@ -1,11 +1,12 @@
 import { inspect } from 'util';
 
 import { PRISMA } from '@delivery/providers';
+import { RabbitMQMessageAggregate } from '@delivery/utils';
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { CommandBus } from '@nestjs/cqrs';
 
 import { PublishOutboxCommand } from './publish.command';
-import { OutboxPrisma, OutboxPrismaAggregate, PrismaService } from './types';
+import { OutboxPrisma, PrismaService } from './types';
 
 @Injectable()
 export class OutboxPrismaService<C> {
@@ -29,18 +30,12 @@ export class OutboxPrismaService<C> {
   ) {
     let data: Awaited<T> | null = null;
     let outbox: OutboxPrisma | null = null;
-    let outboxAggregate: OutboxPrismaAggregate | null = null;
 
     try {
       await this.prisma.$transaction(async (prisma) => {
         data = await writes(prisma as C);
-        outbox = await prisma.outbox.create({
-          data: {
-            exchange: message.exchange,
-            routingKey: message.routingKey || null,
-            payload: JSON.stringify(data),
-          },
-        });
+
+        let aggregate: RabbitMQMessageAggregate | null = null;
 
         if (options.getAggregateEntityId) {
           const entityId = options.getAggregateEntityId(data);
@@ -49,29 +44,37 @@ export class OutboxPrismaService<C> {
             throw new Error(`Invalid entityId: ${entityId}`);
           }
 
-          const latestAggregate = await prisma.outboxAggregate.findFirst({
-            where: { entityId },
-            orderBy: { version: 'desc' },
+          const latestOutbox = await prisma.outbox.findFirst({
+            where: {
+              aggregate: {
+                path: ['entityId'],
+                equals: entityId,
+              },
+            },
+            select: {
+              aggregate: true,
+            },
           });
 
-          if (latestAggregate) {
-            outboxAggregate = await prisma.outboxAggregate.create({
-              data: {
-                outboxId: latestAggregate.outboxId,
+          aggregate = latestOutbox?.aggregate
+            ? {
                 entityId,
-                version: latestAggregate.version + 1,
-              },
-            });
-          } else {
-            outboxAggregate = await prisma.outboxAggregate.create({
-              data: {
-                outboxId: outbox.id,
+                version: latestOutbox.aggregate.version + 1,
+              }
+            : {
                 entityId,
                 version: 1,
-              },
-            });
-          }
+              };
         }
+
+        outbox = await prisma.outbox.create({
+          data: {
+            exchange: message.exchange,
+            routingKey: message.routingKey || null,
+            payload: JSON.stringify(data),
+            aggregate,
+          },
+        });
       });
     } catch (error) {
       this.logger.error(
@@ -85,7 +88,6 @@ export class OutboxPrismaService<C> {
         .execute(
           new PublishOutboxCommand({
             outbox,
-            aggregate: outboxAggregate || undefined,
           })
         )
         .then(() => {

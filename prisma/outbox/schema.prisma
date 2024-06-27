@@ -1,19 +1,9 @@
 model Outbox {
-    id         String           @id @default(cuid())
+    id         String   @id @default(cuid())
     exchange   String
     routingKey String?
     payload    String
-    aggregate  OutboxAggregate?
-    isSent     Boolean          @default(false)
-    createdAt  DateTime         @default(now())
-}
-
-model OutboxAggregate {
-    outboxId  String   @id
-    outbox    Outbox   @relation(fields: [outboxId], references: [id])
-    entityId  String
-    version   Int
-    createdAt DateTime @default(now())
-
-    @@unique([entityId, version(sort: Desc)])
+    aggregate  Json?
+    isSent     Boolean  @default(false)
+    createdAt  DateTime @default(now())
 }
