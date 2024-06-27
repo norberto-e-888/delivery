@@ -2,7 +2,7 @@ import { Service } from '@delivery/api';
 import { AmqpConnection } from '@golevelup/nestjs-rabbitmq';
 import { DynamicModule, Logger, Module, OnModuleInit } from '@nestjs/common';
 
-import { getDLXName } from './get-dlx-name';
+import { getDLQName } from './get-dlq-name';
 import { RETRY_QUEUE_NAME, RetryService } from './retry.service';
 
 @Module({})
@@ -31,12 +31,12 @@ export class RabbitMQRetryModule implements OnModuleInit {
   }
 
   async onModuleInit() {
-    const dlxName = getDLXName(this.service);
-    await this.amqp.channel.assertExchange(dlxName, 'topic', {
+    const dlqName = getDLQName(this.service);
+    await this.amqp.channel.assertQueue(dlqName, {
       durable: true,
     });
 
-    this.logger.log('Dead-letter exchange asserted');
+    this.logger.log('Dead-letter queue asserted');
     await this.amqp.channel.assertQueue(RETRY_QUEUE_NAME);
     this.logger.log('Retry queue asserted');
   }

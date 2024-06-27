@@ -5,7 +5,7 @@ import { RabbitMQMessage } from '@delivery/utils';
 import { Logger } from '@nestjs/common';
 import { Channel, ConsumeMessage } from 'amqplib';
 
-import { getDLXName } from './get-dlx-name';
+import { getDLQName } from './get-dlq-name';
 import { DEFAULT_EXCHANGE, RETRY_QUEUE_NAME } from './retry.service';
 
 export const createRabbitMQErrorHandler =
@@ -39,12 +39,11 @@ export const createRabbitMQErrorHandler =
 
     if (message.meta.retryCount > message.meta.maxRetries) {
       console.error(
-        `Message for queue "${message.meta.originalQueue}" has reached max retries. Moving to dead letter exchange.`
+        `Message for queue "${message.meta.originalQueue}" has reached max retries. Moving to dead letter queue.`
       );
 
-      channel.publish(
-        getDLXName(service),
-        queue,
+      channel.sendToQueue(
+        getDLQName(service),
         Buffer.from(JSON.stringify(message))
       );
 
