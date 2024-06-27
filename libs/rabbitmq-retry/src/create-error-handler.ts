@@ -21,7 +21,7 @@ export const createRabbitMQErrorHandler =
       inspect(error)
     );
 
-    channel.nack(msg, false, false);
+    channel.ack(msg, false);
 
     const payloadString = msg.content.toString();
     const message = JSON.parse(payloadString) as RabbitMQMessage;
