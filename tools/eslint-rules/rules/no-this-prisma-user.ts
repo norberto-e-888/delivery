@@ -7,12 +7,12 @@ export const rule: TSESLint.RuleModule<'noThisPrismaUser', []> = {
   meta: {
     type: 'problem',
     docs: {
-      description: 'Disallow usage of prisma.user',
+      description: 'Disallow usage of "prisma.user"',
       recommended: 'strict',
     },
     schema: [],
     messages: {
-      noThisPrismaUser: 'Use prisma.extended.user instead. ',
+      noThisPrismaUser: 'Use "prisma.extended.user" instead',
     },
   },
   create(context) {
@@ -83,5 +83,3 @@ export const rule: TSESLint.RuleModule<'noThisPrismaUser', []> = {
     };
   },
 };
-
-export default rule;

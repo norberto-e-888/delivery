@@ -19,7 +19,9 @@
             ]
           }
         ],
-        "@nx/workspace-no-this-prisma-user": "error"
+        "@nx/workspace-no-this-prisma-user": "error",
+        "@nx/workspace-invalid-prisma-service-name": "error",
+        "@nx/workspace-invalid-prisma-client-extension-name": "error"
       }
     },
     {
