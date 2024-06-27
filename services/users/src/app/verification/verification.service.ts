@@ -20,7 +20,7 @@ import * as bcrypt from 'bcryptjs';
 import { inspect } from 'util';
 
 import { PrismaService } from '../prisma';
-import { rabbitMqErrorHandler } from '../rabbit-mq-error-handler';
+import { rabbitMQErrorHandler } from '../rabbitmq-error-handler';
 
 @Injectable()
 export class VerificationService {
@@ -38,7 +38,7 @@ export class VerificationService {
     exchange: UsersTopic.SignUp,
     routingKey: '#',
     queue: UsersQueue.SendVerificationEmail,
-    errorHandler: rabbitMqErrorHandler({
+    errorHandler: rabbitMQErrorHandler({
       queue: UsersQueue.SendVerificationEmail,
     }),
   })
