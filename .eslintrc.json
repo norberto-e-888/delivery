@@ -1,7 +1,7 @@
 {
   "root": true,
   "ignorePatterns": ["**/*"],
-  "plugins": ["@nx"],
+  "plugins": ["@nx", "import"],
   "overrides": [
     {
       "files": ["*.ts", "*.tsx", "*.js", "*.jsx"],
@@ -21,7 +21,25 @@
         ],
         "@nx/workspace-no-this-prisma-user": "error",
         "@nx/workspace-invalid-prisma-service-name": "error",
-        "@nx/workspace-invalid-prisma-client-extension-name": "error"
+        "@nx/workspace-invalid-prisma-client-extension-name": "error",
+        "import/order": [
+          "error",
+          {
+            "groups": [
+              "builtin",
+              "external",
+              "internal",
+              "parent",
+              "sibling",
+              "index"
+            ],
+            "newlines-between": "always",
+            "alphabetize": {
+              "order": "asc",
+              "caseInsensitive": true
+            }
+          }
+        ]
       }
     },
     {

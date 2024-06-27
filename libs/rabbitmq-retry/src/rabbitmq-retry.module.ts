@@ -1,9 +1,9 @@
-import { DynamicModule, Logger, Module, OnModuleInit } from '@nestjs/common';
-import { AmqpConnection } from '@golevelup/nestjs-rabbitmq';
-
-import { RETRY_QUEUE_NAME, RetryService } from './retry.service';
 import { Service } from '@delivery/api';
+import { AmqpConnection } from '@golevelup/nestjs-rabbitmq';
+import { DynamicModule, Logger, Module, OnModuleInit } from '@nestjs/common';
+
 import { getDLXName } from './get-dlx-name';
+import { RETRY_QUEUE_NAME, RetryService } from './retry.service';
 
 @Module({})
 export class RabbitMQRetryModule implements OnModuleInit {

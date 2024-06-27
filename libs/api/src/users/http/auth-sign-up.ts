@@ -1,6 +1,6 @@
+import { lowercase, trim } from '@delivery/utils';
 import { Transform } from 'class-transformer';
 import { IsEmail, IsString } from 'class-validator';
-import { lowercase, trim } from '@delivery/utils';
 
 export class UsersAuthSignUpBody {
   @Transform(lowercase)

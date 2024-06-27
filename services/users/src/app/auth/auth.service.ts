@@ -1,6 +1,3 @@
-import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
-import { ConfigService } from '@nestjs/config';
 import {
   UsersAuthSignUpEventPayload,
   UsersAuthSignInBody,
@@ -8,11 +5,13 @@ import {
   UsersTopic,
   usersAuthSignUpEventRoutingKeyGenerators,
 } from '@delivery/api';
-import { User } from '@prisma/users';
-import { REDIS, Redis } from '@delivery/providers';
 import { AccessTokenPayload } from '@delivery/auth';
 import { OutboxPrismaService } from '@delivery/outbox-prisma';
-
+import { REDIS, Redis } from '@delivery/providers';
+import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { JwtService } from '@nestjs/jwt';
+import { User } from '@prisma/users';
 import * as bcrypt from 'bcryptjs';
 import { v4 as uuid } from 'uuid';
 

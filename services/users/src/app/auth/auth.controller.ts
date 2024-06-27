@@ -1,4 +1,12 @@
 import {
+  UsersAuthEndpoint,
+  UsersModule,
+  UsersAuthSignInBody,
+  UsersAuthSignUpBody,
+} from '@delivery/api';
+import { AccessTokenPayload, IsLoggedIn, JwtCookie } from '@delivery/auth';
+import { Cookie, Environment } from '@delivery/utils';
+import {
   Body,
   Controller,
   Get,
@@ -8,19 +16,11 @@ import {
   Res,
   UseGuards,
 } from '@nestjs/common';
-import {
-  UsersAuthEndpoint,
-  UsersModule,
-  UsersAuthSignInBody,
-  UsersAuthSignUpBody,
-} from '@delivery/api';
-import { AccessTokenPayload, IsLoggedIn, JwtCookie } from '@delivery/auth';
-import { Cookie, Environment } from '@delivery/utils';
-
 import { Response, CookieOptions } from 'express';
 
-import { AuthService } from './auth.service';
 import { PrismaService } from '../prisma';
+
+import { AuthService } from './auth.service';
 
 const COOKIE_OPTIONS: CookieOptions = {
   httpOnly: true,

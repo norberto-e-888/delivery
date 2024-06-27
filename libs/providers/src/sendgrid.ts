@@ -1,9 +1,7 @@
+import { CommonConfig, Environment } from '@delivery/utils';
 import { Global, Logger, Module, Provider } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import sendgrid from '@sendgrid/mail';
-
-import { CommonConfig, Environment } from '@delivery/utils';
-
 import Joi from 'joi';
 
 export const SENDGRID = Symbol('SENDGRID');

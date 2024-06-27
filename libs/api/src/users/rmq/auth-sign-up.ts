@@ -1,5 +1,5 @@
-import { User } from '@prisma/users';
 import { RoutingKeyGenerators } from '@delivery/utils';
+import { User } from '@prisma/users';
 
 export type UsersAuthSignUpEventPayload = {
   user: Omit<User, 'password'>;

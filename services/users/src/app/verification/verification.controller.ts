@@ -3,9 +3,10 @@ import {
   UsersModule,
   UsersVerificationEndpoint,
 } from '@delivery/api';
-import { Body, Controller, Post, UseGuards } from '@nestjs/common';
-import { VerificationService } from './verification.service';
 import { AccessTokenPayload, IsLoggedIn } from '@delivery/auth';
+import { Body, Controller, Post, UseGuards } from '@nestjs/common';
+
+import { VerificationService } from './verification.service';
 
 @UseGuards(IsLoggedIn)
 @Controller(UsersModule.Verification)

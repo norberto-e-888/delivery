@@ -1,7 +1,6 @@
 import { Global, Module } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtModule as NestJsJwtModule } from '@nestjs/jwt';
-
 import Joi from 'joi';
 
 @Global()

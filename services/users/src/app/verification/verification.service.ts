@@ -1,3 +1,13 @@
+import { inspect } from 'util';
+
+import {
+  UsersAuthSignUpEventPayload,
+  UsersQueue,
+  UsersTopic,
+} from '@delivery/api';
+import { REDIS, Redis, SENDGRID, Sendgrid } from '@delivery/providers';
+import { RabbitMQMessage } from '@delivery/utils';
+import { RabbitSubscribe } from '@golevelup/nestjs-rabbitmq';
 import {
   HttpException,
   HttpStatus,
@@ -5,19 +15,8 @@ import {
   Injectable,
   Logger,
 } from '@nestjs/common';
-
-import { REDIS, Redis, SENDGRID, Sendgrid } from '@delivery/providers';
-import {
-  UsersAuthSignUpEventPayload,
-  UsersQueue,
-  UsersTopic,
-} from '@delivery/api';
-import { RabbitMQMessage } from '@delivery/utils';
-
-import { RabbitSubscribe } from '@golevelup/nestjs-rabbitmq';
-import { v4 as uuid } from 'uuid';
 import * as bcrypt from 'bcryptjs';
-import { inspect } from 'util';
+import { v4 as uuid } from 'uuid';
 
 import { PrismaService } from '../prisma';
 import { rabbitMQErrorHandler } from '../rabbitmq-error-handler';

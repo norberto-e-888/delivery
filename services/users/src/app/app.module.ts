@@ -1,5 +1,5 @@
-import { Module } from '@nestjs/common';
-import { ConfigModule, ConfigService } from '@nestjs/config';
+import { Service, UsersTopic } from '@delivery/api';
+import { OutboxPrismaModule } from '@delivery/outbox-prisma';
 import {
   JwtModule,
   PrismaModule,
@@ -7,14 +7,14 @@ import {
   RedisModule,
   SendgridModule,
 } from '@delivery/providers';
-import { OutboxPrismaModule } from '@delivery/outbox-prisma';
-import { Service, UsersTopic } from '@delivery/api';
 import { RabbitMQRetryModule } from '@delivery/rabbitmq-retry';
+import { Module } from '@nestjs/common';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 
-import { Config, loadConfig } from './config';
 import { AuthModule } from './auth/auth.module';
-import { VerificationModule } from './verification/verification.module';
+import { Config, loadConfig } from './config';
 import { PrismaService } from './prisma';
+import { VerificationModule } from './verification/verification.module';
 
 @Module({
   imports: [

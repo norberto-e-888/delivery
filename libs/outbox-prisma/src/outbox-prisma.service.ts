@@ -1,11 +1,12 @@
-import { Inject, Injectable, Logger } from '@nestjs/common';
-import { CommandBus } from '@nestjs/cqrs';
-import { PRISMA } from '@delivery/providers';
-
 import { inspect } from 'util';
 
-import { OutboxPrisma, OutboxPrismaAggregate, PrismaService } from './types';
+import { PRISMA } from '@delivery/providers';
+import { Inject, Injectable, Logger } from '@nestjs/common';
+import { CommandBus } from '@nestjs/cqrs';
+
+
 import { PublishOutboxCommand } from './publish.command';
+import { OutboxPrisma, OutboxPrismaAggregate, PrismaService } from './types';
 
 @Injectable()
 export class OutboxPrismaService<C> {

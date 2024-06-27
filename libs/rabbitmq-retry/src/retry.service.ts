@@ -1,7 +1,9 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { inspect } from 'util';
+
 import { RabbitMQMessage } from '@delivery/utils';
 import { AmqpConnection, RabbitSubscribe } from '@golevelup/nestjs-rabbitmq';
-import { inspect } from 'util';
+import { Injectable, Logger } from '@nestjs/common';
+
 
 export const DEFAULT_EXCHANGE = '';
 export const RETRY_QUEUE_NAME = '_retry';

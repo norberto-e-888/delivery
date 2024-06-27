@@ -21,9 +21,9 @@ export const rule: TSESLint.RuleModule<'invalidPrismaClientExtensionName', []> =
       return {
         ClassDeclaration(node: TSESTree.ClassDeclaration) {
           if (
-            node.id && // Ensure the class has a na          node.superClass && // Ensure the class extends something
-            node.superClass.type === 'Identifier' &&
-            node.superClass.name === 'PrismaClient' &&
+            node.id &&
+            node.superClass?.type === 'Identifier' &&
+            node.superClass?.name === 'PrismaClient' &&
             node.id.name !== 'PrismaService'
           ) {
             context.report({

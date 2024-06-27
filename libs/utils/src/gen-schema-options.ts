@@ -1,4 +1,5 @@
 import { SchemaOptions } from '@nestjs/mongoose';
+
 import { BaseModel } from './base-model';
 
 export const genSchemaOptions = <M extends BaseModel>(

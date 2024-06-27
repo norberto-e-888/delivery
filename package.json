@@ -8,7 +8,8 @@
     "generate": "prisma generate --schema=./prisma/$SERVICE/schema.prisma",
     "migrate": "prisma migrate dev --schema=./prisma/$SERVICE/schema.prisma",
     "reset": "prisma migrate reset --schema=./prisma/$SERVICE/schema.prisma",
-    "dockerize": "docker build -t $SERVICE-service -f ./docker/dockerfile.$SERVICE ."
+    "dockerize": "docker build -t $SERVICE-service -f ./docker/dockerfile.$SERVICE .",
+    "fix-lint": "nx run-many --target=lint --all --fix"
   },
   "private": true,
   "devDependencies": {
@@ -37,6 +38,7 @@
     "@typescript-eslint/utils": "^7.3.0",
     "eslint": "~8.57.0",
     "eslint-config-prettier": "^9.0.0",
+    "eslint-plugin-import": "^2.29.1",
     "jest": "^29.4.1",
     "jest-environment-jsdom": "^29.4.1",
     "jest-environment-node": "^29.4.1",

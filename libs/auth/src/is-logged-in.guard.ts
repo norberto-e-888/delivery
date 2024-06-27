@@ -1,3 +1,4 @@
+import { REDIS, Redis } from '@delivery/providers';
 import {
   Injectable,
   CanActivate,
@@ -7,11 +8,9 @@ import {
   Inject,
   createParamDecorator,
 } from '@nestjs/common';
-import { REDIS, Redis } from '@delivery/providers';
 import { Reflector } from '@nestjs/core';
 import { JwtService } from '@nestjs/jwt';
 import { UserRole } from '@prisma/users';
-
 import { Request } from 'express';
 
 @Injectable()

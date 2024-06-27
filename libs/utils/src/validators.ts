@@ -1,6 +1,6 @@
+import { ApiProperty } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
 import { IsInt, IsNumber, Min } from 'class-validator';
-import { ApiProperty } from '@nestjs/swagger';
 
 export class Coordinates {
   @IsNumber({ allowNaN: false, allowInfinity: false, maxDecimalPlaces: 6 })
