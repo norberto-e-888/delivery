@@ -30,52 +30,50 @@ export class AuthService {
   ) {}
 
   async signUp(dto: UsersAuthSignUpBody): Promise<AuthenticatedResponse> {
-    const newUser = await this.outboxPrismaService.publish(
-      async (prisma) => {
-        const existingUser = await prisma.extended.user.findUnique({
-          where: {
-            email: dto.email,
-          },
-          select: {
-            id: true,
-          },
-        });
+    const { user } =
+      await this.outboxPrismaService.publish<UsersAuthSignUpEventPayload>(
+        async (prisma) => {
+          const existingUser = await prisma.extended.user.findUnique({
+            where: {
+              email: dto.email,
+            },
+            select: {
+              id: true,
+            },
+          });
 
-        if (existingUser) {
-          throw new HttpException(
-            'User already exists',
-            HttpStatus.BAD_REQUEST
-          );
-        }
+          if (existingUser) {
+            throw new HttpException(
+              'User already exists',
+              HttpStatus.BAD_REQUEST
+            );
+          }
 
-        const hashedPassword = await bcrypt.hash(dto.password, 12);
-        const newUser = await prisma.extended.user.create({
-          data: {
-            name: dto.name,
-            email: dto.email,
-            password: hashedPassword,
-          },
-        });
+          const hashedPassword = await bcrypt.hash(dto.password, 12);
+          const user = await prisma.extended.user.create({
+            data: {
+              name: dto.name,
+              email: dto.email,
+              password: hashedPassword,
+            },
+          });
 
-        return newUser;
-      },
-      {
-        exchange: UsersTopic.SignUp,
-        routingKey: usersAuthSignUpEventRoutingKeyGenerators.producer(),
-      },
-      {
-        transformPayload: (user): UsersAuthSignUpEventPayload => ({
-          user,
-        }),
-        aggregate: {
-          genEntityIdKey: (user) => user.id,
+          return {
+            user,
+          };
         },
-      }
-    );
+        {
+          exchange: UsersTopic.SignUp,
+          routingKey: usersAuthSignUpEventRoutingKeyGenerators.producer(),
+        },
+        {
+          getAggregateEntityId: (payload) => payload.user.id,
+        }
+      );
 
     return {
-      user: newUser,
-      tokens: await this.generateTokens(newUser),
+      user,
+      tokens: await this.generateTokens(user),
     };
   }
 
@@ -234,7 +232,7 @@ export class AuthService {
 }
 
 export type AuthenticatedResponse = {
-  user: User;
+  user: Omit<User, 'password'>;
   tokens: Tokens;
 };
 

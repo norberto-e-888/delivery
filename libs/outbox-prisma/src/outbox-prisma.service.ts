@@ -4,7 +4,6 @@ import { PRISMA } from '@delivery/providers';
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { CommandBus } from '@nestjs/cqrs';
 
-
 import { PublishOutboxCommand } from './publish.command';
 import { OutboxPrisma, OutboxPrismaAggregate, PrismaService } from './types';
 
@@ -25,42 +24,26 @@ export class OutboxPrismaService<C> {
       routingKey?: string;
     },
     options: {
-      transformPayload?:
-        | ((result: T) => Promise<unknown>)
-        | ((result: T) => unknown);
-      aggregate?: {
-        genEntityIdKey: (result: T) => string;
-      };
+      getAggregateEntityId?: (result: T) => string;
     } = {}
   ) {
-    let returnData: Awaited<T> | null = null;
+    let data: Awaited<T> | null = null;
     let outbox: OutboxPrisma | null = null;
     let outboxAggregate: OutboxPrismaAggregate | null = null;
 
     try {
       await this.prisma.$transaction(async (prisma) => {
-        let payload: string;
-
-        const data = await writes(prisma as C);
-
-        if (options?.transformPayload) {
-          payload = JSON.stringify(await options.transformPayload(data));
-        } else {
-          payload = data ? JSON.stringify(data) : '{}';
-        }
-
+        data = await writes(prisma as C);
         outbox = await prisma.outbox.create({
           data: {
             exchange: message.exchange,
             routingKey: message.routingKey || null,
-            payload,
+            payload: JSON.stringify(data),
           },
         });
 
-        returnData = data;
-
-        if (options.aggregate) {
-          const entityId = options.aggregate.genEntityIdKey(data);
+        if (options.getAggregateEntityId) {
+          const entityId = options.getAggregateEntityId(data);
 
           if (typeof entityId !== 'string') {
             throw new Error(`Invalid entityId: ${entityId}`);
@@ -119,6 +102,6 @@ export class OutboxPrismaService<C> {
         });
     }
 
-    return returnData;
+    return data;
   }
 }
