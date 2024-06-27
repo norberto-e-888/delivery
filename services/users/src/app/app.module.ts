@@ -8,12 +8,13 @@ import {
   SendgridModule,
 } from '@delivery/providers';
 import { OutboxPrismaModule } from '@delivery/outbox-prisma';
-import { UsersTopic } from '@delivery/api';
+import { Service, UsersTopic } from '@delivery/api';
+import { RabbitMQRetryModule } from '@delivery/rabbitmq-retry';
 
-import { Config, loadConfig } from '../config';
+import { Config, loadConfig } from './config';
 import { AuthModule } from './auth/auth.module';
 import { VerificationModule } from './verification/verification.module';
-import { PrismaService } from '../prisma';
+import { PrismaService } from './prisma';
 
 @Module({
   imports: [
@@ -35,6 +36,7 @@ import { PrismaService } from '../prisma';
     JwtModule,
     RedisModule,
     RabbitMQModule.forRoot(UsersTopic),
+    RabbitMQRetryModule.forRoot(Service.Users),
     SendgridModule,
     AuthModule,
     VerificationModule,

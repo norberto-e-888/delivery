@@ -16,8 +16,8 @@ import { OutboxPrismaService } from '@delivery/outbox-prisma';
 import * as bcrypt from 'bcryptjs';
 import { v4 as uuid } from 'uuid';
 
-import { Config } from '../../config';
-import { PrismaService } from '../../prisma';
+import { Config } from '../config';
+import { PrismaService } from '../prisma';
 
 @Injectable()
 export class AuthService {

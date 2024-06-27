@@ -1,7 +1,7 @@
 import { Global, Module } from '@nestjs/common';
 import { CqrsModule } from '@nestjs/cqrs';
 import { OutboxPrismaPublisher } from './publish.command';
-import { OutboxPrismaService } from './outbox.service';
+import { OutboxPrismaService } from './outbox-prisma.service';
 
 @Global()
 @Module({

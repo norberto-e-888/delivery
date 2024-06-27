@@ -7,16 +7,20 @@ import {
 } from '@nestjs/common';
 
 import { REDIS, Redis, SENDGRID, Sendgrid } from '@delivery/providers';
-import { UsersAuthSignUpEventPayload, UsersTopic } from '@delivery/api';
+import {
+  UsersAuthSignUpEventPayload,
+  UsersQueue,
+  UsersTopic,
+} from '@delivery/api';
 import { RabbitMQMessage } from '@delivery/utils';
 
-import { AmqpConnection, RabbitSubscribe } from '@golevelup/nestjs-rabbitmq';
+import { RabbitSubscribe } from '@golevelup/nestjs-rabbitmq';
 import { v4 as uuid } from 'uuid';
 import * as bcrypt from 'bcryptjs';
 import { inspect } from 'util';
-import { Channel, ConsumeMessage } from 'amqplib';
 
-import { PrismaService } from '../../prisma';
+import { PrismaService } from '../prisma';
+import { rabbitMqErrorHandler } from '../rabbit-mq-error-handler';
 
 @Injectable()
 export class VerificationService {
@@ -27,93 +31,16 @@ export class VerificationService {
     private readonly sendgrid: Sendgrid,
     @Inject(REDIS)
     private readonly redis: Redis,
-    private readonly prisma: PrismaService,
-    private readonly amqp: AmqpConnection
+    private readonly prisma: PrismaService
   ) {}
-
-  @RabbitSubscribe({
-    exchange: '',
-    routingKey: '', // the default exchange is of type direct, so this routing key does nothing but it helps to make the logs from '@golevelup/nestjs-rabbitmq' prettier
-    queue: '_retry',
-  })
-  async retry(message: RabbitMQMessage) {
-    try {
-      this.logger.debug('retrying message', message);
-      this.amqp.channel.sendToQueue(
-        message.meta.originalQueue,
-        Buffer.from(JSON.stringify(message))
-      );
-    } catch (error) {
-      this.logger.error(
-        'Error processing message for queue "retry":',
-        inspect(error)
-      );
-    }
-  }
 
   @RabbitSubscribe({
     exchange: UsersTopic.SignUp,
     routingKey: '#',
-    queue: 'users.verification.send-verification-email',
-    errorHandler: async (
-      channel: Channel,
-      msg: ConsumeMessage,
-      error: unknown
-    ) => {
-      console.error(
-        'Error processing message for queue "users.verification.send-verification-email":',
-        inspect(error)
-      );
-
-      channel.nack(msg, false, false);
-
-      const payloadString = msg.content.toString();
-      const message = JSON.parse(payloadString) as RabbitMQMessage;
-
-      if (!message.meta) {
-        message.meta = {
-          baseDelay: 1000,
-          maxRetries: 4,
-          originalQueue: 'users.verification.send-verification-email',
-          retryCount: 1,
-        };
-      } else {
-        message.meta.retryCount += 1;
-      }
-
-      if (message.meta.retryCount > message.meta.maxRetries) {
-        console.error(
-          `Message for queue "${message.meta.originalQueue}" has reached max retries. Moving to dead letter exchange.`
-        );
-
-        const deadLetterName = '_dead-letter-users-service';
-
-        await channel.assertQueue(deadLetterName);
-
-        channel.sendToQueue(
-          deadLetterName,
-          Buffer.from(JSON.stringify(message))
-        );
-
-        return;
-      }
-
-      console.log(message);
-
-      const messageTtl = message.meta.baseDelay * 2 ** message.meta.retryCount;
-      const delayedQueueName = `_delayed-${messageTtl}`;
-
-      await channel.assertQueue(delayedQueueName, {
-        deadLetterExchange: '',
-        deadLetterRoutingKey: '_retry',
-        messageTtl,
-      });
-
-      channel.sendToQueue(
-        delayedQueueName,
-        Buffer.from(JSON.stringify(message))
-      );
-    },
+    queue: UsersQueue.SendVerificationEmail,
+    errorHandler: rabbitMqErrorHandler({
+      queue: UsersQueue.SendVerificationEmail,
+    }),
   })
   protected async sendVerificationEmail(
     message: RabbitMQMessage<UsersAuthSignUpEventPayload>

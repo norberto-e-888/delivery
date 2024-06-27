@@ -20,7 +20,7 @@ import { Cookie, Environment } from '@delivery/utils';
 import { Response, CookieOptions } from 'express';
 
 import { AuthService } from './auth.service';
-import { PrismaService } from '../../prisma';
+import { PrismaService } from '../prisma';
 
 const COOKIE_OPTIONS: CookieOptions = {
   httpOnly: true,

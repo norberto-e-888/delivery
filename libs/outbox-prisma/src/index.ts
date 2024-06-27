@@ -1,2 +1,2 @@
-export * from './outbox.module';
-export * from './outbox.service';
+export * from './outbox-prisma.module';
+export * from './outbox-prisma.service';

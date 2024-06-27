@@ -34,7 +34,10 @@ export class OutboxPrismaPublisher
     });
 
     const message: RabbitMQMessage = {
-      aggregate: command.message.aggregate,
+      aggregate: command.message.aggregate && {
+        entityId: command.message.aggregate.entityId,
+        version: command.message.aggregate.version,
+      },
       payload: JSON.parse(command.message.outbox.payload),
     };
 
