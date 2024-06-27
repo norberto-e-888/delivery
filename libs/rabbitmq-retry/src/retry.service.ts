@@ -4,7 +4,6 @@ import { RabbitMQMessage } from '@delivery/utils';
 import { AmqpConnection, RabbitSubscribe } from '@golevelup/nestjs-rabbitmq';
 import { Injectable, Logger } from '@nestjs/common';
 
-
 export const DEFAULT_EXCHANGE = '';
 export const RETRY_QUEUE_NAME = '_retry';
 
@@ -16,7 +15,7 @@ export class RetryService {
 
   @RabbitSubscribe({
     exchange: DEFAULT_EXCHANGE,
-    routingKey: '', // the default exchange is of type direct, so this routing key does nothing but it helps to make the logs from '@golevelup/nestjs-rabbitmq' prettier
+    routingKey: '',
     queue: RETRY_QUEUE_NAME,
   })
   async retry(message: RabbitMQMessage) {

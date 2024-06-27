@@ -35,7 +35,7 @@ export class VerificationService {
 
   @RabbitSubscribe({
     exchange: UsersTopic.SignUp,
-    routingKey: '#',
+    routingKey: '',
     queue: UsersQueue.SendVerificationEmail,
     errorHandler: rabbitMQErrorHandler({
       queue: UsersQueue.SendVerificationEmail,

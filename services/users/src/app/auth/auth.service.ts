@@ -3,7 +3,6 @@ import {
   UsersAuthSignInBody,
   UsersAuthSignUpBody,
   UsersTopic,
-  usersAuthSignUpEventRoutingKeyGenerators,
 } from '@delivery/api';
 import { AccessTokenPayload } from '@delivery/auth';
 import { OutboxPrismaService } from '@delivery/outbox-prisma';
@@ -64,7 +63,6 @@ export class AuthService {
         },
         {
           exchange: UsersTopic.SignUp,
-          routingKey: usersAuthSignUpEventRoutingKeyGenerators.producer(),
         },
         {
           getAggregateEntityId: (payload) => payload.user.id,

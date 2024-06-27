@@ -1,11 +1,18 @@
+import { RabbitMQModule } from '@delivery/providers';
 import { Module } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
 
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
+import { loadConfig } from './config';
+import { TestService } from './test.service';
 
 @Module({
-  imports: [],
-  controllers: [AppController],
-  providers: [AppService],
+  imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+      load: [loadConfig],
+    }),
+    RabbitMQModule.forRoot({}),
+  ],
+  providers: [TestService],
 })
 export class AppModule {}
