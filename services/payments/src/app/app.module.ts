@@ -5,7 +5,6 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 
 import { loadConfig } from './config';
-import { TestService } from './test.service';
 
 @Module({
   imports: [
@@ -16,6 +15,5 @@ import { TestService } from './test.service';
     RabbitMQModule.forRoot({}),
     RabbitMQRetryModule.forRoot(Service.Payments),
   ],
-  providers: [TestService],
 })
 export class AppModule {}
