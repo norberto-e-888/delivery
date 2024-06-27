@@ -52,7 +52,7 @@ export const createRabbitMQErrorHandler =
     }
 
     const messageTtl = message.meta.baseDelay * 2 ** message.meta.retryCount;
-    const delayedQueueName = `_delayed-${messageTtl}`;
+    const delayedQueueName = `_delayed.${messageTtl}`;
 
     await channel.assertQueue(delayedQueueName, {
       deadLetterExchange: DEFAULT_EXCHANGE,

@@ -1,3 +1,3 @@
 import { Service } from '@delivery/api';
 
-export const getDLXName = (service: Service) => `_DLX-${service}`;
+export const getDLXName = (service: Service) => `_dlx.${service}`;
