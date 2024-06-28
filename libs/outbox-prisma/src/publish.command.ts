@@ -30,10 +30,7 @@ export class OutboxPrismaPublisher
     const {
       message: { outbox },
     } = command;
-    this.logger.debug({
-      message: command.message,
-    });
-
+    this.logger.debug(command.message);
     const message: RabbitMQMessage = {
       payload: JSON.parse(outbox.payload),
     };

@@ -5,9 +5,9 @@ import { RabbitMQMessage } from '@delivery/utils';
 import { Logger } from '@nestjs/common';
 import { Channel, ConsumeMessage } from 'amqplib';
 
-import { getDLQName } from './get-dlq-name';
 import { DEFAULT_EXCHANGE, RETRY_QUEUE_NAME } from './retry.service';
 
+export const getDLQName = (service: Service) => `_dlq.${service}`;
 export const createRabbitMQErrorHandler =
   (service: Service) =>
   ({

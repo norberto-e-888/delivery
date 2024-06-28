@@ -1,5 +1,5 @@
 export * from './http';
-export * from './rmq';
+export * from './rabbitmq';
 
 export enum Service {
   Delivery = 'delivery',

@@ -7,7 +7,6 @@ import {
   RedisModule,
   SendgridModule,
 } from '@delivery/providers';
-import { RabbitMQRetryModule } from '@delivery/rabbitmq-retry';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 
@@ -35,8 +34,10 @@ import { VerificationModule } from './verification/verification.module';
     OutboxPrismaModule,
     JwtModule,
     RedisModule,
-    RabbitMQModule.forRoot(UsersTopic),
-    RabbitMQRetryModule.forRoot(Service.Users),
+    RabbitMQModule.forRoot({
+      service: Service.Users,
+      topics: UsersTopic,
+    }),
     SendgridModule,
     AuthModule,
     VerificationModule,

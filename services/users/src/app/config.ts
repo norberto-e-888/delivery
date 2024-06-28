@@ -1,11 +1,11 @@
 import {
   JwtConfig,
-  RMQConfig,
+  RabbitMQConfig,
   RedisConfig,
   SendgridConfig,
   jwtConfigJoiSchema,
   redisConfigJoiSchema,
-  rmqConfigJoiSchema,
+  rabbitmqConfigJoiSchema,
   sendgridConfigJoiSchema,
   PrismaConfig,
   prismaConfigJoiSchema,
@@ -34,8 +34,8 @@ export const loadConfig = () => {
     redis: {
       url: process.env.REDIS_URL,
     },
-    rmq: {
-      uri: process.env.RMQ_URI,
+    rabbitmq: {
+      uri: process.env.RABBITMQ_URI,
     },
     sendgrid: {
       apiKey: process.env.SENDGRID_API_KEY,
@@ -47,7 +47,7 @@ export const loadConfig = () => {
     .concat(jwtConfigJoiSchema)
     .concat(prismaConfigJoiSchema)
     .concat(redisConfigJoiSchema)
-    .concat(rmqConfigJoiSchema)
+    .concat(rabbitmqConfigJoiSchema)
     .concat(sendgridConfigJoiSchema)
     .concat(commonConfigJoiSchema)
     .concat(
@@ -74,7 +74,7 @@ type ServiceConfig = {
 export type Config = JwtConfig &
   PrismaConfig &
   RedisConfig &
-  RMQConfig &
+  RabbitMQConfig &
   SendgridConfig &
   CommonConfig &
   ServiceConfig;
