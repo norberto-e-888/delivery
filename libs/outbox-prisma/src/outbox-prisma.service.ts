@@ -30,7 +30,6 @@ export class OutboxPrismaService<C> {
     try {
       await this.prisma.$transaction(async (prisma) => {
         data = await writes(prisma as C);
-
         outbox = await prisma.outbox.create({
           data: {
             exchange: message.exchange,
@@ -43,6 +42,7 @@ export class OutboxPrismaService<C> {
       this.logger.error(
         `Error with OutboxPrisma transaction: ${inspect(error)}`
       );
+
       throw error;
     }
 
