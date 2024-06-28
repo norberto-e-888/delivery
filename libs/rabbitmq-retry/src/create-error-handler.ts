@@ -21,8 +21,6 @@ export const createRabbitMQErrorHandler =
       inspect(error)
     );
 
-    channel.ack(msg, false);
-
     const payloadString = msg.content.toString();
     const message = JSON.parse(payloadString) as RabbitMQMessage;
 
@@ -60,6 +58,10 @@ export const createRabbitMQErrorHandler =
     });
 
     channel.sendToQueue(delayedQueueName, Buffer.from(JSON.stringify(message)));
+    /**
+     * Acknowledging message after sending to delayed queue to mantain at least once delivery semantics
+     */
+    channel.ack(msg, false);
   };
 
 export interface CreateRabbitMQErrorHandlerArgs {
