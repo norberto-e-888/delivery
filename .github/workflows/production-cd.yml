@@ -1,0 +1,55 @@
+name: Production CD
+
+on:
+  pull_request:
+    branches: [main]
+  pull_request_target:
+    types: [closed]
+    branches: [main]
+
+concurrency:
+  group: production-deploy
+  cancel-in-progress: true
+
+jobs:
+  determine-affected:
+    if: github.event.pull_request.merged == true
+    uses: ./.github/jobs/determine-affected.yml
+
+  prisma-migrate:
+    needs: determine-affected
+    uses: ./.github/jobs/prisma-migrate.yml
+    with:
+      environment: PRODUCTION
+
+  deploy-to-heroku-production:
+    needs: prisma-migrate
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy affected NestJS apps to Heroku Production
+        run: |
+          IFS=',' read -ra AFFECTED_APPS <<< "${{ needs.determine-affected.outputs.affected_nestjs }}"
+          for app in "${AFFECTED_APPS[@]}"; do
+            echo "Promoting $app to Heroku production"
+            heroku pipelines:promote --app $app-staging
+          done
+        env:
+          HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
+
+  deploy-to-vercel-production:
+    needs: deploy-to-heroku-production
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Deploy affected React apps to Vercel Production
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+        run: |
+          npm i -g vercel
+          IFS=',' read -ra AFFECTED_APPS <<< "${{ needs.determine-affected.outputs.affected_react }}"
+          for app in "${AFFECTED_APPS[@]}"; do
+            echo "Promoting $app to Vercel production"
+            vercel --token $VERCEL_TOKEN --scope $VERCEL_ORG_ID --prod deploy apps/$app
+          done

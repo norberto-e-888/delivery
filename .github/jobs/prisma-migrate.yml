@@ -1,0 +1,28 @@
+name: Prisma Migrate
+
+on:
+  workflow_call:
+    inputs:
+      environment:
+        required: true
+        type: string
+
+jobs:
+  prisma-migrate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: '14'
+      - run: npm ci
+      - run: |
+          IFS=',' read -ra AFFECTED_APPS <<< "${{ needs.determine-affected.outputs.affected_nestjs }}"
+          for app in "${AFFECTED_APPS[@]}"; do
+            echo "Running Prisma migrations for $app in ${{ inputs.environment }}"
+            cd apps/$app
+            DATABASE_URL_SECRET="DATABASE_URL_${{ inputs.environment }}_${app^^}"
+            DATABASE_URL="${{ secrets[env.DATABASE_URL_SECRET] }}"
+            npx prisma migrate deploy
+            cd ../..
+          done
