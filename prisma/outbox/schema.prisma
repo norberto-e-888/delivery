@@ -3,7 +3,6 @@ model Outbox {
     exchange   String
     routingKey String?
     payload    String
-    aggregate  Json?
     isSent     Boolean  @default(false)
     createdAt  DateTime @default(now())
 }

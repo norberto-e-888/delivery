@@ -63,9 +63,6 @@ export class AuthService {
         },
         {
           exchange: UsersTopic.SignUp,
-        },
-        {
-          getAggregateEntityId: (payload) => payload.user.id,
         }
       );
 

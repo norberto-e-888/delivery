@@ -1,4 +1,3 @@
-import { RMQConfig, rmqConfigJoiSchema } from '@delivery/providers';
 import {
   CommonConfig,
   commonConfigJoiSchema,
@@ -12,14 +11,9 @@ export const loadConfig = () => {
       port: +process.env.PORT,
       environment: process.env.NODE_ENV as Environment,
     },
-    rmq: {
-      uri: process.env.RMQ_URI,
-    },
   };
 
-  const validationSchema = Joi.any()
-    .concat(commonConfigJoiSchema)
-    .concat(rmqConfigJoiSchema);
+  const validationSchema = Joi.any().concat(commonConfigJoiSchema);
 
   const { error } = validationSchema.validate(config, {
     abortEarly: false,
@@ -32,4 +26,4 @@ export const loadConfig = () => {
   return config;
 };
 
-export type Config = CommonConfig & RMQConfig;
+export type Config = CommonConfig;
