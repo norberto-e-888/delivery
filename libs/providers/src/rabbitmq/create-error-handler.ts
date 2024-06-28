@@ -45,6 +45,10 @@ export const createRabbitMQErrorHandler =
         Buffer.from(JSON.stringify(message))
       );
 
+      /**
+       * Acknowledging message after sending to DLQ to mantain at least once delivery semantics
+       */
+      channel.ack(msg, false);
       return;
     }
 
