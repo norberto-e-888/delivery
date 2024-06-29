@@ -20,7 +20,7 @@ jobs:
           IFS=',' read -ra AFFECTED_APPS <<< "${{ needs.determine-affected.outputs.affected_nestjs }}"
           for app in "${AFFECTED_APPS[@]}"; do
             echo "Running Prisma migrations for $app in ${{ inputs.environment }}"
-            cd apps/$app
+            cd services/$app
             DATABASE_URL_SECRET="DATABASE_URL_${{ inputs.environment }}_${app^^}"
             DATABASE_URL="${{ secrets[env.DATABASE_URL_SECRET] }}"
             npx prisma migrate deploy

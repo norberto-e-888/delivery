@@ -22,34 +22,20 @@ jobs:
     with:
       environment: PRODUCTION
 
-  deploy-to-heroku-production:
+  deploy-to-railway:
     needs: prisma-migrate
-    runs-on: ubuntu-latest
-    steps:
-      - name: Deploy affected NestJS apps to Heroku Production
-        run: |
-          IFS=',' read -ra AFFECTED_APPS <<< "${{ needs.determine-affected.outputs.affected_nestjs }}"
-          for app in "${AFFECTED_APPS[@]}"; do
-            echo "Promoting $app to Heroku production"
-            heroku pipelines:promote --app $app-staging
-          done
-        env:
-          HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
+    uses: ./.github/workflows/railway-deploy.yml
+    with:
+      environment: PRODUCTION
+    secrets:
+      RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
 
-  deploy-to-vercel-production:
-    needs: deploy-to-heroku-production
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - name: Deploy affected React apps to Vercel Production
-        env:
-          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
-        run: |
-          npm i -g vercel
-          IFS=',' read -ra AFFECTED_APPS <<< "${{ needs.determine-affected.outputs.affected_react }}"
-          for app in "${AFFECTED_APPS[@]}"; do
-            echo "Promoting $app to Vercel production"
-            vercel --token $VERCEL_TOKEN --scope $VERCEL_ORG_ID --prod deploy apps/$app
-          done
+  deploy-to-vercel:
+    needs: deploy-to-railway
+    uses: ./.github/workflows/vercel-deploy.yml
+    with:
+      environment: PRODUCTION
+    secrets:
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}

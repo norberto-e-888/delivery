@@ -22,36 +22,20 @@ jobs:
     with:
       environment: STAGING
 
-  deploy-to-heroku-staging:
+  deploy-to-railway:
     needs: prisma-migrate
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - name: Deploy affected NestJS apps to Heroku Staging
-        run: |
-          IFS=',' read -ra AFFECTED_APPS <<< "${{ needs.determine-affected.outputs.affected_nestjs }}"
-          for app in "${AFFECTED_APPS[@]}"; do
-            echo "Deploying $app to Heroku staging"
-            heroku push web --app $app-staging
-            heroku release web --app $app-staging
-          done
-        env:
-          HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
+    uses: ./.github/workflows/railway-deploy.yml
+    with:
+      environment: STAGING
+    secrets:
+      RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
 
-  deploy-to-vercel-staging:
-    needs: deploy-to-heroku-staging
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - name: Deploy affected React apps to Vercel Staging
-        env:
-          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
-        run: |
-          npm i -g vercel
-          IFS=',' read -ra AFFECTED_APPS <<< "${{ needs.determine-affected.outputs.affected_react }}"
-          for app in "${AFFECTED_APPS[@]}"; do
-            echo "Deploying $app to Vercel staging"
-            vercel --token $VERCEL_TOKEN --scope $VERCEL_ORG_ID deploy apps/$app --env NEXT_PUBLIC_ENV=staging
-          done
+  deploy-to-vercel:
+    needs: deploy-to-railway
+    uses: ./.github/workflows/vercel-deploy.yml
+    with:
+      environment: STAGING
+    secrets:
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}

@@ -1,0 +1,28 @@
+name: Deploy to Railway
+
+on:
+  workflow_call:
+    inputs:
+      environment:
+        required: true
+        type: string
+    secrets:
+      RAILWAY_TOKEN:
+        required: true
+
+jobs:
+  deploy-to-railway:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install Railway CLI
+        run: npm i -g @railway/cli
+      - name: Deploy affected NestJS apps to Railway
+        run: |
+          IFS=',' read -ra AFFECTED_APPS <<< "${{ needs.determine-affected.outputs.affected_nestjs }}"
+          for app in "${AFFECTED_APPS[@]}"; do
+            echo "Deploying $app to Railway ${{ inputs.environment }} environment"
+            railway up --service $app --environment ${{ inputs.environment }}
+          done
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
