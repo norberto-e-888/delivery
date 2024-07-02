@@ -1,6 +1,6 @@
 /* eslint-disable */
 export default {
-  displayName: 'service-payments',
+  displayName: 'payments',
   preset: '../../jest.preset.js',
   testEnvironment: 'node',
   transform: {

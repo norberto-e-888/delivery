@@ -1,6 +1,6 @@
 /* eslint-disable */
 export default {
-  displayName: 'service-delivery',
+  displayName: 'delivery',
   preset: '../../jest.preset.js',
   testEnvironment: 'node',
   transform: {

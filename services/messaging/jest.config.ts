@@ -1,6 +1,6 @@
 /* eslint-disable */
 export default {
-  displayName: 'service-messaging',
+  displayName: 'messaging',
   preset: '../../jest.preset.js',
   testEnvironment: 'node',
   transform: {

@@ -1,6 +1,6 @@
 /* eslint-disable */
 export default {
-  displayName: 'service-marketplace',
+  displayName: 'marketplace',
   preset: '../../jest.preset.js',
   testEnvironment: 'node',
   transform: {

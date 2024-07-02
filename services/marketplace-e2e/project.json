@@ -1,8 +1,8 @@
 {
-  "name": "service-marketplace-e2e",
+  "name": "marketplace-e2e",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "projectType": "application",
-  "implicitDependencies": ["service-marketplace"],
+  "implicitDependencies": ["marketplace"],
   "targets": {
     "e2e": {
       "executor": "@nx/jest:jest",
@@ -11,7 +11,7 @@
         "jestConfig": "services/marketplace-e2e/jest.config.ts",
         "passWithNoTests": true
       },
-      "dependsOn": ["service-marketplace:build"]
+      "dependsOn": ["marketplace:build"]
     }
   }
 }

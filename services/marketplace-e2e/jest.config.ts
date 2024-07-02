@@ -1,6 +1,6 @@
 /* eslint-disable */
 export default {
-  displayName: 'service-marketplace-e2e',
+  displayName: 'marketplace-e2e',
   preset: '../../jest.preset.js',
   globalSetup: '<rootDir>/src/support/global-setup.ts',
   globalTeardown: '<rootDir>/src/support/global-teardown.ts',
@@ -15,5 +15,5 @@ export default {
     ],
   },
   moduleFileExtensions: ['ts', 'js', 'html'],
-  coverageDirectory: '../../coverage/service-marketplace-e2e',
+  coverageDirectory: '../../coverage/marketplace-e2e',
 };

@@ -1,5 +1,5 @@
 {
-  "name": "service-payments",
+  "name": "payments",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "services/payments/src",
   "projectType": "application",
@@ -9,14 +9,14 @@
       "executor": "@nx/js:node",
       "defaultConfiguration": "development",
       "options": {
-        "buildTarget": "service-payments:build"
+        "buildTarget": "payments:build"
       },
       "configurations": {
         "development": {
-          "buildTarget": "service-payments:build:development"
+          "buildTarget": "payments:build:development"
         },
         "production": {
-          "buildTarget": "service-payments:build:production"
+          "buildTarget": "payments:build:production"
         }
       }
     }

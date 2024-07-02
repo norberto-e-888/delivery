@@ -1,5 +1,5 @@
 {
-  "name": "service-marketplace",
+  "name": "marketplace",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "services/marketplace/src",
   "projectType": "application",
@@ -9,14 +9,14 @@
       "executor": "@nx/js:node",
       "defaultConfiguration": "development",
       "options": {
-        "buildTarget": "service-marketplace:build"
+        "buildTarget": "marketplace:build"
       },
       "configurations": {
         "development": {
-          "buildTarget": "service-marketplace:build:development"
+          "buildTarget": "marketplace:build:development"
         },
         "production": {
-          "buildTarget": "service-marketplace:build:production"
+          "buildTarget": "marketplace:build:production"
         }
       }
     }

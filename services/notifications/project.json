@@ -1,5 +1,5 @@
 {
-  "name": "service-notifications",
+  "name": "notifications",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "services/notifications/src",
   "projectType": "application",
@@ -9,14 +9,14 @@
       "executor": "@nx/js:node",
       "defaultConfiguration": "development",
       "options": {
-        "buildTarget": "service-notifications:build"
+        "buildTarget": "notifications:build"
       },
       "configurations": {
         "development": {
-          "buildTarget": "service-notifications:build:development"
+          "buildTarget": "notifications:build:development"
         },
         "production": {
-          "buildTarget": "service-notifications:build:production"
+          "buildTarget": "notifications:build:production"
         }
       }
     }

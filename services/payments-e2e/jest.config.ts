@@ -1,6 +1,6 @@
 /* eslint-disable */
 export default {
-  displayName: 'service-payments-e2e',
+  displayName: 'payments-e2e',
   preset: '../../jest.preset.js',
   globalSetup: '<rootDir>/src/support/global-setup.ts',
   globalTeardown: '<rootDir>/src/support/global-teardown.ts',
@@ -15,5 +15,5 @@ export default {
     ],
   },
   moduleFileExtensions: ['ts', 'js', 'html'],
-  coverageDirectory: '../../coverage/service-payments-e2e',
+  coverageDirectory: '../../coverage/payments-e2e',
 };

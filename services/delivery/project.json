@@ -1,5 +1,5 @@
 {
-  "name": "service-delivery",
+  "name": "delivery",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "services/delivery/src",
   "projectType": "application",
@@ -9,14 +9,14 @@
       "executor": "@nx/js:node",
       "defaultConfiguration": "development",
       "options": {
-        "buildTarget": "service-delivery:build"
+        "buildTarget": "delivery:build"
       },
       "configurations": {
         "development": {
-          "buildTarget": "service-delivery:build:development"
+          "buildTarget": "delivery:build:development"
         },
         "production": {
-          "buildTarget": "service-delivery:build:production"
+          "buildTarget": "delivery:build:production"
         }
       }
     }
