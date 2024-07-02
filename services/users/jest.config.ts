@@ -1,6 +1,6 @@
 /* eslint-disable */
 export default {
-  displayName: 'service-users',
+  displayName: 'users',
   preset: '../../jest.preset.js',
   testEnvironment: 'node',
   transform: {

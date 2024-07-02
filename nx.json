@@ -35,17 +35,12 @@
         "targetName": "test"
       },
       "exclude": [
-        "services/marketplace-e2e/**/*",
-        "services/fulfillment-e2e/**/*",
-        "services/search-e2e/**/*",
-        "services/notifications-e2e/**/*",
-        "services/drivers-e2e/**/*",
-        "services/payments-e2e/**/*",
-        "services/order-assignment-e2e/**/*",
-        "services/users-e2e/**/*",
-        "services/users-e2e/**/*",
         "services/delivery-e2e/**/*",
-        "services/messaging-e2e/**/*"
+        "services/marketplace-e2e/**/*",
+        "services/messaging-e2e/**/*",
+        "services/notifications-e2e/**/*",
+        "services/payments-e2e/**/*",
+        "services/users-e2e/**/*"
       ]
     }
   ],

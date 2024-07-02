@@ -1,5 +1,5 @@
 {
-  "name": "service-users",
+  "name": "users",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "services/users/src",
   "projectType": "application",
@@ -9,14 +9,14 @@
       "executor": "@nx/js:node",
       "defaultConfiguration": "development",
       "options": {
-        "buildTarget": "service-users:build"
+        "buildTarget": "users:build"
       },
       "configurations": {
         "development": {
-          "buildTarget": "service-users:build:development"
+          "buildTarget": "users:build:development"
         },
         "production": {
-          "buildTarget": "service-users:build:production"
+          "buildTarget": "users:build:production"
         }
       }
     }
