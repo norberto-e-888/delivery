@@ -3,6 +3,8 @@ import {
   UsersModule,
   UsersAuthSignInBody,
   UsersAuthSignUpBody,
+  UsersAuthSendPasswordRecoveryBody,
+  UsersAuthRecoverPasswordBody,
 } from '@delivery/api';
 import { AccessTokenPayload, IsLoggedIn, JwtCookie } from '@delivery/auth';
 import { Cookie, Environment } from '@delivery/utils';
@@ -113,6 +115,32 @@ export class AuthController {
       .catch(() => {
         throw new HttpException('User not found', HttpStatus.NOT_FOUND);
       });
+
+    return {
+      user,
+    };
+  }
+
+  @Post(UsersAuthEndpoint.SendPasswordRecovery)
+  async handleSendPasswordRecovery(
+    @Body() body: UsersAuthSendPasswordRecoveryBody
+  ) {
+    await this.authService.sendPasswordRecovery(body.email);
+
+    return {
+      message: `You will receive a recovery code at ${body.email} if said email exists in our system`,
+    };
+  }
+
+  @Post(UsersAuthEndpoint.RecoverPassword)
+  async handleRecoverPassword(
+    @Body() body: UsersAuthRecoverPasswordBody,
+    @Res({ passthrough: true }) res: Response
+  ) {
+    const { tokens, user } = await this.authService.recoverPassword(body);
+
+    res.cookie(JwtCookie.AccessToken, tokens.accessToken, COOKIE_OPTIONS);
+    res.cookie(JwtCookie.RefreshToken, tokens.refreshToken, COOKIE_OPTIONS);
 
     return {
       user,
