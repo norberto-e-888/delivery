@@ -8,7 +8,13 @@ import {
 import { AccessTokenPayload } from '@delivery/auth';
 import { OutboxPrismaService } from '@delivery/outbox-prisma';
 import { REDIS, Redis, SENDGRID, Sendgrid } from '@delivery/providers';
-import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
+import {
+  HttpException,
+  HttpStatus,
+  Inject,
+  Injectable,
+  Logger,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { User } from '@prisma/users';
@@ -20,6 +26,8 @@ import { PrismaService } from '../prisma';
 
 @Injectable()
 export class AuthService {
+  private readonly logger = new Logger(AuthService.name);
+
   constructor(
     @Inject(REDIS)
     private readonly redis: Redis,
@@ -199,9 +207,15 @@ export class AuthService {
       );
     }
 
-    const hashedRecoveryCode = await this.redis.get(
-      `password-recovery-code:${dto.email}`
-    );
+    const key = `password-recovery-code:${dto.email}`;
+    const hashedRecoveryCode = await this.redis.get(key);
+
+    if (!hashedRecoveryCode) {
+      throw new HttpException(
+        'Password recovery flow is not active for this user',
+        HttpStatus.BAD_REQUEST
+      );
+    }
 
     const isCodeValid = await bcrypt.compare(dto.code, hashedRecoveryCode);
 
@@ -219,6 +233,17 @@ export class AuthService {
         password: newHashedPassword,
       },
     });
+
+    this.redis
+      .del(key)
+      .then(() => {
+        this.logger.verbose(`Password recovery code deleted for ${dto.email}`);
+      })
+      .catch(() => {
+        this.logger.verbose(
+          `Failed to delete password recovery code deleted for ${dto.email}`
+        );
+      });
 
     return {
       user,
