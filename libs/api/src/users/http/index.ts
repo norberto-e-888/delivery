@@ -1,5 +1,6 @@
 export * from './auth-sign-in';
 export * from './auth-sign-up';
+export * from './recover-password';
 export * from './verification-verify-email';
 
 type Method = 'POST' | 'GET' | 'DELETE' | 'PATCH';
@@ -16,6 +17,7 @@ export enum UsersAuthEndpoint {
   SignOut = 'sign-out',
   Refresh = 'refresh',
   Me = 'me',
+  RecoverPassword = 'recover-password',
 }
 
 export const UsersAuthEndpointToMethodMap: EndpointToMethodMap<UsersAuthEndpoint> =
@@ -24,6 +26,7 @@ export const UsersAuthEndpointToMethodMap: EndpointToMethodMap<UsersAuthEndpoint
     [UsersAuthEndpoint.SignIn]: 'POST',
     [UsersAuthEndpoint.SignOut]: 'POST',
     [UsersAuthEndpoint.Refresh]: 'POST',
+    [UsersAuthEndpoint.RecoverPassword]: 'POST',
     [UsersAuthEndpoint.Me]: 'GET',
   };
 

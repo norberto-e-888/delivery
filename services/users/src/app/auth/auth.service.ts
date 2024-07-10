@@ -3,6 +3,7 @@ import {
   UsersAuthSignInBody,
   UsersAuthSignUpBody,
   UsersTopic,
+  UsersAuthRecoverPasswordBody,
 } from '@delivery/api';
 import { AccessTokenPayload } from '@delivery/auth';
 import { OutboxPrismaService } from '@delivery/outbox-prisma';
@@ -178,6 +179,49 @@ export class AuthService {
     this.redis.set(`consider-all-tokens-expired:${userId}`, 1, {
       EX: accessTokenDuration,
     });
+  }
+
+  async recoverPassword(
+    dto: UsersAuthRecoverPasswordBody
+  ): Promise<AuthenticatedResponse> {
+    const user = await this.prisma.extended.user.findUnique({
+      where: {
+        email: dto.email,
+      },
+    });
+
+    if (!user) {
+      throw new HttpException(
+        'No user with that email exists on our system',
+        HttpStatus.NOT_FOUND
+      );
+    }
+
+    const hashedRecoveryCode = await this.redis.get(
+      `password-recovery-code:${dto.email}`
+    );
+
+    const isCodeValid = await bcrypt.compare(dto.code, hashedRecoveryCode);
+
+    if (!isCodeValid) {
+      throw new HttpException('Invalid code', HttpStatus.FORBIDDEN);
+    }
+
+    const newHashedPassword = await bcrypt.hash(dto.newPassword, 12);
+
+    await this.prisma.extended.user.update({
+      where: {
+        id: user.id,
+      },
+      data: {
+        password: newHashedPassword,
+      },
+    });
+
+    return {
+      user,
+      tokens: await this.generateTokens(user),
+    };
   }
 
   private async generateTokens(
