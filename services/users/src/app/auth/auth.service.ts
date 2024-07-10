@@ -7,7 +7,7 @@ import {
 } from '@delivery/api';
 import { AccessTokenPayload } from '@delivery/auth';
 import { OutboxPrismaService } from '@delivery/outbox-prisma';
-import { REDIS, Redis } from '@delivery/providers';
+import { REDIS, Redis, SENDGRID, Sendgrid } from '@delivery/providers';
 import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
@@ -23,6 +23,8 @@ export class AuthService {
   constructor(
     @Inject(REDIS)
     private readonly redis: Redis,
+    @Inject(SENDGRID)
+    private readonly sendgrid: Sendgrid,
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService<Config>,
     private readonly outboxPrismaService: OutboxPrismaService<PrismaService>,
@@ -222,6 +224,30 @@ export class AuthService {
       user,
       tokens: await this.generateTokens(user),
     };
+  }
+
+  async sendPasswordRecovery(email: string): Promise<void> {
+    const user = await this.prisma.extended.user.findUnique({
+      where: {
+        email,
+      },
+    });
+
+    if (!user) {
+      return;
+    }
+
+    const code = uuid().slice(0, 6);
+    const hashedCode = await bcrypt.hash(code, 12);
+    const key = `password-recovery-code:${email}`;
+
+    await this.redis.set(key, hashedCode);
+    await this.sendgrid.send({
+      from: 'norberto.e.888@gmail.com',
+      to: email,
+      subject: 'Password recovery',
+      text: `Use this code: ${code} to set a new password`,
+    });
   }
 
   private async generateTokens(
