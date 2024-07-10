@@ -46,14 +46,32 @@ export class VerificationService {
   ) {
     const {
       payload: {
-        user: { email, id },
+        user: { id },
       },
     } = message;
 
-    const token = uuid().slice(0, 6);
-    const hashedToken = await bcrypt.hash(token, 10);
+    await this.sendEmailVerification(id);
+  }
 
-    await this.redis.set(`email-verification-token:${id}`, hashedToken, {
+  async sendEmailVerification(userId: string) {
+    const user = await this.prisma.extended.user.findUnique({
+      where: {
+        id: userId,
+      },
+    });
+
+    if (!user) {
+      throw new HttpException(
+        'User not found when attempting to send email verification',
+        HttpStatus.NOT_FOUND
+      );
+    }
+
+    const { email } = user;
+    const token = uuid().slice(0, 6);
+    const hashedToken = await bcrypt.hash(token, 12);
+
+    await this.redis.set(`email-verification-token:${userId}`, hashedToken, {
       EX: 60 * 60 * 24,
     });
 

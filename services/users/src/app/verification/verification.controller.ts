@@ -23,4 +23,11 @@ export class VerificationController {
       token: body.token,
     });
   }
+
+  @Post(UsersVerificationEndpoint.ResendEmailVerification)
+  async handleResendEmailVerification(
+    @AccessTokenPayload() atp: AccessTokenPayload
+  ) {
+    await this.verificationService.sendEmailVerification(atp.id);
+  }
 }
