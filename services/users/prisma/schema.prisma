@@ -1,6 +1,6 @@
 generator client {
   provider = "prisma-client-js"
-  output   = "../../node_modules/@prisma/users"
+  output   = "../../../node_modules/@prisma/users"
 }
 
 datasource db {
@@ -29,10 +29,10 @@ model User {
 }
 
 enum UserRole {
-  CLERK
+  ADMIN
   DINER
   DRIVER
-  RESTAURANT_OWNER
   RESTAURANT_ADMIN
+  RESTAURANT_OWNER
   ROOT
 }

@@ -5,11 +5,10 @@
   "scripts": {
     "up": "docker-compose -f ./compose.local.yml up -d",
     "down": "docker-compose -f ./compose.local.yml down",
-    "generate": "prisma generate --schema=./services/$SERVICE/schema.prisma",
-    "migrate": "prisma migrate dev --schema=./services/$SERVICE/schema.prisma",
-    "migrate-create-only": "prisma migrate dev --schema=./services/$SERVICE/schema.prisma --create-only",
-    "reset": "prisma migrate reset --schema=./services/$SERVICE/schema.prisma",
-    "dockerize": "docker build -t $SERVICE-service -f ./docker/dockerfile.$SERVICE .",
+    "generate": "prisma generate --schema=./services/$SERVICE/prisma/schema.prisma",
+    "migrate": "prisma migrate dev --schema=./services/$SERVICE/prisma/schema.prisma",
+    "migrate-create-only": "prisma migrate dev --schema=./services/$SERVICE/prisma/schema.prisma --create-only",
+    "reset": "prisma migrate reset --schema=./services/$SERVICE/prisma/schema.prisma",
     "fix-lint": "nx run-many --target=lint --all --fix"
   },
   "private": true,
