@@ -20,7 +20,7 @@ services:
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq/data
 
-  users_redis:
+  redis:
     image: redis:alpine
     ports:
       - '2000:6379'

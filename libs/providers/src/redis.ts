@@ -39,8 +39,7 @@ export const redisConfigJoiSchema = Joi.object<RedisConfig>({
     url: Joi.string().required(),
     host: Joi.string().required(),
     port: Joi.number().required().positive().integer(),
-    username: Joi.string()
-    .custom((value?: string) => {
+    username: Joi.string().custom((value?: string) => {
       if (
         process.env['NODE_ENV'] !== Environment.Development &&
         process.env['NODE_ENV'] !== Environment.Testing &&
@@ -49,8 +48,7 @@ export const redisConfigJoiSchema = Joi.object<RedisConfig>({
         throw new Error('Redis username is required');
       }
     }),
-    password: Joi.string()
-    .custom((value?: string) => {
+    password: Joi.string().custom((value?: string) => {
       if (
         process.env['NODE_ENV'] !== Environment.Development &&
         process.env['NODE_ENV'] !== Environment.Testing &&
@@ -59,6 +57,25 @@ export const redisConfigJoiSchema = Joi.object<RedisConfig>({
         throw new Error('Redis password is required');
       }
     }),
+    db: Joi.number()
+      .custom((value?: string) => {
+        if (
+          (process.env['NODE_ENV'] === Environment.Production ||
+            process.env['NODE_ENV'] === Environment.Staging) &&
+          value != null
+        ) {
+          throw new Error('Redis db must not be present');
+        }
+
+        if (
+          (process.env['NODE_ENV'] == Environment.Development ||
+            process.env['NODE_ENV'] === Environment.Testing) &&
+          value == null
+        ) {
+          throw new Error('Redis db is required');
+        }
+      })
+      .allow(0, 1, 2, 3, 4, 5), // allow as many as there are services
   }).required(),
 });
 
@@ -69,6 +86,7 @@ export type RedisConfig = {
     port: number;
     username?: string;
     password?: string;
+    db?: number;
   };
 };
 

@@ -37,6 +37,7 @@ export const loadConfig = () => {
       port: +process.env.REDIS_PORT,
       username: process.env.REDIS_USERNAME,
       password: process.env.REDIS_PASSWORD,
+      db: +process.env.REDIS_DB,
     },
     rabbitmq: {
       uri: process.env.RABBITMQ_URI,

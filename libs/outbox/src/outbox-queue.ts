@@ -69,6 +69,8 @@ export class OutboxQueueScheduler implements OnModuleInit {
           every: 1000 * 5,
         },
         jobId: 'outbox-publisher-job',
+        removeOnComplete: true,
+        removeOnFail: true,
       }
     );
   }

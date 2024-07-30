@@ -25,7 +25,7 @@ import { OutboxPrismaPublisher } from './publish.command';
           throw new Error("Expected to find Redis config under key 'redis'");
         }
 
-        const { host, port, username, password } = redisConfig;
+        const { host, port, username, password, db } = redisConfig;
 
         return {
           connection: {
@@ -33,6 +33,7 @@ import { OutboxPrismaPublisher } from './publish.command';
             port,
             username,
             password,
+            db,
           },
         };
       },
