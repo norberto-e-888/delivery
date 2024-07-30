@@ -5,5 +5,5 @@ export enum UsersTopic {
 }
 
 export enum UsersQueue {
-  SendVerificationEmail = 'users.verification.send-verification-email',
+  SendEmailVerification = 'users.verification.send-email-verification',
 }

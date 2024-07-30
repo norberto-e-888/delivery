@@ -36,12 +36,12 @@ export class VerificationService {
   @RabbitSubscribe({
     exchange: UsersTopic.SignUp,
     routingKey: '',
-    queue: UsersQueue.SendVerificationEmail,
+    queue: UsersQueue.SendEmailVerification,
     errorHandler: rabbitMQErrorHandler({
-      queue: UsersQueue.SendVerificationEmail,
+      queue: UsersQueue.SendEmailVerification,
     }),
   })
-  protected async sendVerificationEmail(
+  protected async _sendEmailVerification(
     message: RabbitMQMessage<UsersAuthSignUpEventPayload>
   ) {
     const {
