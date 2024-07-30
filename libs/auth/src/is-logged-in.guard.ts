@@ -92,6 +92,7 @@ export enum JwtCookie {
 export type AccessTokenPayload = {
   id: string;
   roles: UserRole[];
+  isEmailVerified: boolean;
 };
 
 export type AppRequest = Request & { atp: AccessTokenPayload };

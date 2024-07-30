@@ -167,13 +167,7 @@ export class AuthService {
             throw new HttpException('User not found', HttpStatus.NOT_FOUND);
           });
 
-        return this.generateTokens(
-          {
-            id: user.id,
-            roles: user.roles,
-          },
-          token
-        );
+        return this.generateTokens(user, token);
       }
     }
 
@@ -276,13 +270,19 @@ export class AuthService {
   }
 
   private async generateTokens(
-    atp: AccessTokenPayload,
+    user: User | Omit<User, 'password'>,
     currentSessionHashedToken?: string
   ): Promise<Tokens> {
     const { accessTokenDuration } =
       this.configService.get<Config['jwt']>('jwt');
 
     const maxSessions = this.configService.get<number>('maxSessions');
+
+    const atp: AccessTokenPayload = {
+      id: user.id,
+      roles: user.roles,
+      isEmailVerified: user.isEmailVerified,
+    };
 
     const accessToken = this.jwtService.sign(atp, {
       expiresIn: accessTokenDuration,
