@@ -41,7 +41,7 @@ export class VerificationService {
       queue: UsersQueue.SendEmailVerification,
     }),
   })
-  protected async _sendEmailVerification(
+  protected async sendEmailVerificationOnSignUp(
     message: RabbitMQMessage<UsersAuthSignUpEventPayload>
   ) {
     const {
