@@ -13,6 +13,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AuthModule } from './auth/auth.module';
 import { Config, loadConfig } from './config';
 import { PrismaService } from './prisma';
+import { ProfileModule } from './profile/profile.module';
 import { VerificationModule } from './verification/verification.module';
 
 @Module({
@@ -40,6 +41,7 @@ import { VerificationModule } from './verification/verification.module';
     }),
     SendgridModule,
     AuthModule,
+    ProfileModule,
     VerificationModule,
   ],
 })

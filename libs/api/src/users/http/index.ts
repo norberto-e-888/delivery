@@ -2,6 +2,7 @@ export * from './auth-sign-in';
 export * from './auth-sign-up';
 export * from './auth-recover-password';
 export * from './auth-send-password-recovery';
+export * from './profile-update-info';
 export * from './verification-verify-email';
 
 type Method = 'POST' | 'GET' | 'DELETE' | 'PATCH';
@@ -9,6 +10,7 @@ type EndpointToMethodMap<E extends string> = Record<E, Method>;
 
 export enum UsersModule {
   Auth = 'auth',
+  Profile = 'profile',
   Verification = 'verification',
 }
 
@@ -31,6 +33,15 @@ export const UsersAuthEndpointToMethodMap: EndpointToMethodMap<UsersAuthEndpoint
     [UsersAuthEndpoint.Me]: 'GET',
     [UsersAuthEndpoint.RecoverPassword]: 'POST',
     [UsersAuthEndpoint.SendPasswordRecovery]: 'POST',
+  };
+
+export enum UsersProfileEndpoint {
+  UpdateProfileInfo = '',
+}
+
+export const UsersProfileEndpointToMethodMap: EndpointToMethodMap<UsersProfileEndpoint> =
+  {
+    [UsersProfileEndpoint.UpdateProfileInfo]: 'PATCH',
   };
 
 export enum UsersVerificationEndpoint {
