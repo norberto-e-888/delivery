@@ -28,4 +28,7 @@ CREATE TABLE "User" (
 );
 
 -- CreateIndex
+CREATE INDEX "Outbox_isSent_createdAt_idx" ON "Outbox"("isSent", "createdAt" ASC);
+
+-- CreateIndex
 CREATE UNIQUE INDEX "User_email_key" ON "User"("email");

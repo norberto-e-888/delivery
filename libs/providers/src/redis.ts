@@ -1,3 +1,4 @@
+import { Environment } from '@delivery/utils';
 import { Global, Module, Provider } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import Joi from 'joi';
@@ -36,11 +37,39 @@ export class RedisModule {}
 export const redisConfigJoiSchema = Joi.object<RedisConfig>({
   redis: Joi.object<RedisConfig['redis']>({
     url: Joi.string().required(),
+    host: Joi.string().required(),
+    port: Joi.number().required().positive().integer(),
+    username: Joi.string()
+    .custom((value?: string) => {
+      if (
+        process.env['NODE_ENV'] !== Environment.Development &&
+        process.env['NODE_ENV'] !== Environment.Testing &&
+        !value
+      ) {
+        throw new Error('Redis username is required');
+      }
+    }),
+    password: Joi.string()
+    .custom((value?: string) => {
+      if (
+        process.env['NODE_ENV'] !== Environment.Development &&
+        process.env['NODE_ENV'] !== Environment.Testing &&
+        !value
+      ) {
+        throw new Error('Redis password is required');
+      }
+    }),
   }).required(),
 });
 
 export type RedisConfig = {
-  redis: { url: string };
+  redis: {
+    url: string;
+    host: string;
+    port: number;
+    username?: string;
+    password?: string;
+  };
 };
 
 export type Redis = ReturnType<typeof createClient>;

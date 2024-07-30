@@ -19,6 +19,14 @@ export interface PrismaClient {
       where: { id: string };
       data: { isSent: boolean };
     }) => Promise<OutboxPrisma>;
+    findMany: (args: {
+      where: {
+        isSent: boolean;
+      };
+      orderBy: {
+        createdAt: 'asc' | 'desc';
+      };
+    }) => Promise<OutboxPrisma[]>;
   };
 }
 

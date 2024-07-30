@@ -6,7 +6,7 @@ import {
   UsersAuthRecoverPasswordBody,
 } from '@delivery/api';
 import { AccessTokenPayload } from '@delivery/auth';
-import { OutboxPrismaService } from '@delivery/outbox-prisma';
+import { OutboxPrismaService } from '@delivery/outbox';
 import { REDIS, Redis, SENDGRID, Sendgrid } from '@delivery/providers';
 import {
   HttpException,

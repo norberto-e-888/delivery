@@ -1,5 +1,5 @@
 import { Service, UsersTopic } from '@delivery/api';
-import { OutboxPrismaModule } from '@delivery/outbox-prisma';
+import { OutboxPrismaModule } from '@delivery/outbox';
 import {
   JwtModule,
   PrismaModule,
