@@ -8,8 +8,8 @@ import { PublishOutboxCommand } from './publish.command';
 import { OutboxPrisma, PrismaService } from './types';
 
 @Injectable()
-export class OutboxPrismaService<C> {
-  private readonly logger = new Logger(OutboxPrismaService.name);
+export class OutboxService<C> {
+  private readonly logger = new Logger(OutboxService.name);
 
   constructor(
     @Inject(PRISMA)

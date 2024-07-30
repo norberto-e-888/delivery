@@ -6,7 +6,7 @@ import {
   UsersAuthRecoverPasswordBody,
 } from '@delivery/api';
 import { AccessTokenPayload } from '@delivery/auth';
-import { OutboxPrismaService } from '@delivery/outbox';
+import { OutboxService } from '@delivery/outbox';
 import { REDIS, Redis, SENDGRID, Sendgrid } from '@delivery/providers';
 import {
   HttpException,
@@ -35,13 +35,13 @@ export class AuthService {
     private readonly sendgrid: Sendgrid,
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService<Config>,
-    private readonly outboxPrismaService: OutboxPrismaService<PrismaService>,
+    private readonly outboxService: OutboxService<PrismaService>,
     private readonly prisma: PrismaService
   ) {}
 
   async signUp(dto: UsersAuthSignUpBody): Promise<AuthenticatedResponse> {
     const { user } =
-      await this.outboxPrismaService.publish<UsersAuthSignUpEventPayload>(
+      await this.outboxService.publish<UsersAuthSignUpEventPayload>(
         async (prisma) => {
           const existingUser = await prisma.extended.user.findUnique({
             where: {

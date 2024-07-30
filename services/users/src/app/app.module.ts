@@ -1,5 +1,5 @@
 import { Service, UsersTopic } from '@delivery/api';
-import { OutboxPrismaModule } from '@delivery/outbox';
+import { OutboxModule } from '@delivery/outbox';
 import {
   JwtModule,
   PrismaModule,
@@ -31,7 +31,7 @@ import { VerificationModule } from './verification/verification.module';
         };
       },
     }),
-    OutboxPrismaModule,
+    OutboxModule,
     JwtModule,
     RedisModule,
     RabbitMQModule.forRoot({

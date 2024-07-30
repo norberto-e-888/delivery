@@ -9,7 +9,7 @@ import {
   OutboxQueueProcessor,
   OutboxQueueScheduler,
 } from './outbox-queue';
-import { OutboxPrismaService } from './outbox.service';
+import { OutboxService } from './outbox.service';
 import { OutboxPrismaPublisher } from './publish.command';
 
 @Global()
@@ -43,10 +43,10 @@ import { OutboxPrismaPublisher } from './publish.command';
   ],
   providers: [
     OutboxPrismaPublisher,
-    OutboxPrismaService,
+    OutboxService,
     OutboxQueueProcessor,
     OutboxQueueScheduler,
   ],
-  exports: [OutboxPrismaService],
+  exports: [OutboxService],
 })
-export class OutboxPrismaModule {}
+export class OutboxModule {}
