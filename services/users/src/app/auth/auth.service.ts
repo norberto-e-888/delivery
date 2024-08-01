@@ -379,11 +379,30 @@ export class AuthService {
       throw new HttpException('Invalid magic link', HttpStatus.NOT_FOUND);
     }
 
-    const user = await this.prisma.extended.user.findUnique({
-      where: {
-        id: userId,
-      },
-    });
+    let user = await this.prisma.extended.user
+      .findUniqueOrThrow({
+        where: {
+          id: userId,
+        },
+      })
+      .catch(() => {
+        throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+      });
+
+    if (!user.isEmailVerified) {
+      user = await this.prisma.extended.user.update({
+        where: {
+          id: userId,
+        },
+        data: {
+          isEmailVerified: true,
+        },
+      });
+
+      // we need to invalidate all current live tokens to trigger a refresh on all of the user's sessions so they get the
+      // updated isEmailVerified flag in their ATP
+      await this.tokenExpiryOverride(user.id);
+    }
 
     return {
       user,
@@ -441,6 +460,15 @@ export class AuthService {
       accessToken,
       refreshToken,
     };
+  }
+
+  private async tokenExpiryOverride(userId: string): Promise<void> {
+    const { accessTokenDuration } =
+      this.configService.get<Config['jwt']>('jwt');
+
+    await this.redis.set(RedisKeysFactory.tokenExpiryOverride(userId), 1, {
+      EX: accessTokenDuration,
+    });
   }
 }
 
