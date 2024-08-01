@@ -18,6 +18,7 @@ import {
 import * as bcrypt from 'bcryptjs';
 import { v4 as uuid } from 'uuid';
 
+import { RedisKeysFactory } from '../../utils';
 import { PrismaService } from '../prisma';
 import { rabbitMQErrorHandler } from '../rabbitmq-error-handler';
 
@@ -71,9 +72,13 @@ export class VerificationService {
     const token = uuid().slice(0, 6);
     const hashedToken = await bcrypt.hash(token, 12);
 
-    await this.redis.set(`email-verification-token:${userId}`, hashedToken, {
-      EX: 60 * 60 * 24,
-    });
+    await this.redis.set(
+      RedisKeysFactory.emailVerificationToken(user.id),
+      hashedToken,
+      {
+        EX: 60 * 60 * 24,
+      }
+    );
 
     this.logger.log(`Sending email verification to ${email}`);
 
@@ -87,9 +92,10 @@ export class VerificationService {
 
   async verifyEmail(dto: { userId: string; token: string }) {
     const { userId, token } = dto;
-    const hashedToken = await this.redis.get(
-      `email-verification-token:${userId}`
-    );
+    const emailVerificationTokenKey =
+      RedisKeysFactory.emailVerificationToken(userId);
+
+    const hashedToken = await this.redis.get(emailVerificationTokenKey);
 
     if (!hashedToken) {
       throw new HttpException(
@@ -114,7 +120,7 @@ export class VerificationService {
     });
 
     this.redis
-      .del(`email-verification-token:${userId}`)
+      .del(emailVerificationTokenKey)
       .then(() => {
         this.logger.verbose(`Deleted email-verification-token:${userId}`);
       })

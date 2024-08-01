@@ -21,6 +21,7 @@ import { User } from '@prisma/users';
 import * as bcrypt from 'bcryptjs';
 import { v4 as uuid } from 'uuid';
 
+import { RedisKeysFactory } from '../../utils';
 import { Config } from '../config';
 import { PrismaService } from '../prisma';
 
@@ -126,29 +127,26 @@ export class AuthService {
     userId: string,
     refreshToken: string
   ): Promise<void> {
-    const hashedRefreshTokens = await this.redis.zRange(
-      `refresh-tokens:${userId}`,
-      0,
-      -1
-    );
+    const refreshTokenKey = RedisKeysFactory.refreshTokens(userId);
+    const hashedRefreshTokens = await this.redis.zRange(refreshTokenKey, 0, -1);
 
     for (const token of hashedRefreshTokens) {
       const isTokenValid = await bcrypt.compare(refreshToken, token);
 
       if (isTokenValid) {
-        await this.redis.zRem(`refresh-tokens:${userId}`, token);
+        await this.redis.zRem(refreshTokenKey, token);
         return;
       }
     }
   }
 
   async signOutFromAllDevices(userId: string): Promise<void> {
-    await this.redis.del(`refresh-tokens:${userId}`);
+    await this.redis.del(RedisKeysFactory.refreshTokens(userId));
   }
 
   async refreshTokens(userId: string, refreshToken: string): Promise<Tokens> {
     const hashedRefreshTokens = await this.redis.zRange(
-      `refresh-tokens:${userId}`,
+      RedisKeysFactory.refreshTokens(userId),
       0,
       -1
     );
@@ -180,7 +178,7 @@ export class AuthService {
     const { accessTokenDuration } =
       this.configService.get<Config['jwt']>('jwt');
 
-    this.redis.set(`consider-all-tokens-expired:${userId}`, 1, {
+    this.redis.set(RedisKeysFactory.tokenExpiryOverride(userId), 1, {
       EX: accessTokenDuration,
     });
   }
@@ -201,9 +199,11 @@ export class AuthService {
       );
     }
 
-    const key = `password-recovery-code:${dto.email}`;
-    const hashedRecoveryCode = await this.redis.get(key);
+    const passwordRecoveryCodeKey = RedisKeysFactory.passwordRecoveryCode(
+      user.email
+    );
 
+    const hashedRecoveryCode = await this.redis.get(passwordRecoveryCodeKey);
     if (!hashedRecoveryCode) {
       throw new HttpException(
         'Password recovery flow is not active for this user',
@@ -229,7 +229,7 @@ export class AuthService {
     });
 
     this.redis
-      .del(key)
+      .del(passwordRecoveryCodeKey)
       .then(() => {
         this.logger.verbose(`Password recovery code deleted for ${dto.email}`);
       })
@@ -258,9 +258,12 @@ export class AuthService {
 
     const code = uuid().slice(0, 6);
     const hashedCode = await bcrypt.hash(code, 12);
-    const key = `password-recovery-code:${email}`;
 
-    await this.redis.set(key, hashedCode);
+    await this.redis.set(
+      RedisKeysFactory.passwordRecoveryCode(user.email),
+      hashedCode
+    );
+
     await this.sendgrid.send({
       from: 'norberto.e.888@gmail.com',
       to: email,
@@ -290,26 +293,27 @@ export class AuthService {
 
     const refreshToken = uuid();
     const token = await bcrypt.hash(refreshToken, 12);
+    const refreshTokenKey = RedisKeysFactory.refreshTokens(atp.id);
 
-    await this.redis.watch(`refresh-tokens:${atp.id}`);
+    await this.redis.watch(refreshTokenKey);
 
     const multi = this.redis.multi();
 
-    multi.zAdd(`refresh-tokens:${atp.id}`, {
+    multi.zAdd(refreshTokenKey, {
       score: Date.now(),
       value: token,
     });
 
     if (currentSessionHashedToken) {
-      multi.zRem(`refresh-tokens:${atp.id}`, currentSessionHashedToken);
+      multi.zRem(refreshTokenKey, currentSessionHashedToken);
     }
 
     const numberOfSessions =
-      (await this.redis.zCard(`refresh-tokens:${atp.id}`)) +
+      (await this.redis.zCard(refreshTokenKey)) +
       (currentSessionHashedToken ? 0 : 1);
 
     if (numberOfSessions > maxSessions) {
-      multi.zPopMin(`refresh-tokens:${atp.id}`);
+      multi.zPopMin(refreshTokenKey);
     }
 
     await multi.exec();
