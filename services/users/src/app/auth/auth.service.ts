@@ -115,6 +115,8 @@ export class AuthService {
       throw new HttpException('Invalid credentials', HttpStatus.NOT_FOUND);
     }
 
+    // this is the only place where we have to worry about manually deleting the password from the user object
+    // as our linting rule only allows this.prisma.user to be accessed in the context of AuthService.signIn
     delete existingUserWithPassword.password;
 
     return {
