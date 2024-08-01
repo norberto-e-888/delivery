@@ -1,5 +1,6 @@
 export * from './auth-sign-in';
 export * from './auth-sign-up';
+export * from './auth-sign-out';
 export * from './auth-recover-password';
 export * from './auth-send-password-recovery';
 export * from './auth-change-email';

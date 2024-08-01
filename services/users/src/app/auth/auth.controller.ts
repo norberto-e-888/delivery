@@ -8,6 +8,7 @@ import {
   UsersAuthChangeEmailBody,
   UsersAuthCreateMagicLinkBody,
   UsersAuthValidateMagicLinkBody,
+  UsersAuthSignOutQuery,
 } from '@delivery/api';
 import { AccessTokenPayload, IsLoggedIn, JwtCookie } from '@delivery/auth';
 import { Cookie, Environment } from '@delivery/utils';
@@ -19,6 +20,7 @@ import {
   HttpStatus,
   Patch,
   Post,
+  Query,
   Res,
   UseGuards,
 } from '@nestjs/common';
@@ -75,17 +77,24 @@ export class AuthController {
   @UseGuards(IsLoggedIn)
   @Post(UsersAuthEndpoint.SignOut)
   async handleSignOut(
+    @Query() query: UsersAuthSignOutQuery,
     @Res({ passthrough: true }) res: Response,
     @AccessTokenPayload() atp: AccessTokenPayload,
     @Cookie(JwtCookie.RefreshToken) refreshToken: string
   ) {
-    await this.authService.signOutFromSingleDevice(atp.id, refreshToken);
+    if (query.fromAllSessions) {
+      await this.authService.signOutFromAllDevices(atp.id);
+    } else {
+      await this.authService.signOutFromSingleDevice(atp.id, refreshToken);
+    }
 
     res.clearCookie(JwtCookie.AccessToken, COOKIE_OPTIONS);
     res.clearCookie(JwtCookie.RefreshToken, COOKIE_OPTIONS);
 
     return {
-      message: 'Successfully signed out',
+      message: query.fromAllSessions
+        ? 'Successfully signed out from all devices'
+        : 'Successfully signed out',
     };
   }
 
