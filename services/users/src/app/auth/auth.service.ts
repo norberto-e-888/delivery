@@ -1,3 +1,5 @@
+import { randomBytes } from 'crypto';
+
 import {
   UsersAuthSignUpEventPayload,
   UsersAuthSignInBody,
@@ -5,6 +7,7 @@ import {
   UsersTopic,
   UsersAuthRecoverPasswordBody,
   UsersAuthChangeEmailBody,
+  UsersAuthValidateMagicLinkBody,
 } from '@delivery/api';
 import { AccessTokenPayload } from '@delivery/auth';
 import { OutboxService } from '@delivery/outbox';
@@ -86,7 +89,7 @@ export class AuthService {
   }
 
   async signIn(dto: UsersAuthSignInBody): Promise<AuthenticatedResponse> {
-    const existingUser = await this.prisma.extended.user
+    const existingUserWithPassword = await this.prisma.user
       .findUniqueOrThrow({
         where: {
           email: dto.email,
@@ -96,31 +99,27 @@ export class AuthService {
         throw new HttpException('Invalid credentials', HttpStatus.NOT_FOUND);
       });
 
-    const userWithPassword = await this.prisma.user
-      .findUniqueOrThrow({
-        where: {
-          id: existingUser.id,
-        },
-        select: {
-          password: true,
-        },
-      })
-      .catch(() => {
-        throw new HttpException('User not found', HttpStatus.NOT_FOUND);
-      });
+    if (!existingUserWithPassword.password) {
+      throw new HttpException(
+        "You haven't configured a password yet, as it seems you created your account with a magic link",
+        HttpStatus.BAD_REQUEST
+      );
+    }
 
     const isPasswordValid = await bcrypt.compare(
       dto.password,
-      userWithPassword.password
+      existingUserWithPassword.password
     );
 
     if (!isPasswordValid) {
       throw new HttpException('Invalid credentials', HttpStatus.NOT_FOUND);
     }
 
+    delete existingUserWithPassword.password;
+
     return {
-      user: existingUser,
-      tokens: await this.generateTokens(existingUser),
+      user: existingUserWithPassword,
+      tokens: await this.generateTokens(existingUserWithPassword),
     };
   }
 
@@ -330,6 +329,63 @@ export class AuthService {
     return {
       user: updatedUser,
       tokens: await this.generateTokens(updatedUser),
+    };
+  }
+
+  async createMagicLink(email: string): Promise<void> {
+    let user = await this.prisma.extended.user.findUnique({
+      where: { email },
+    });
+
+    if (!user) {
+      user = await this.prisma.extended.user.create({
+        data: {
+          email,
+        },
+      });
+    }
+
+    const token = randomBytes(32).toString('hex');
+    const hashedToken = await bcrypt.hash(token, 12);
+    await this.redis.set(RedisKeysFactory.magicLink(user.id), hashedToken, {
+      EX: 60 * 5, // expires in 5 minutes
+    });
+
+    const link = `http://localhost:3000/auth/magic-link?token=${token}&userId=${user.id}`;
+    await this.sendgrid.send({
+      from: 'norberto.e.888@gmail.com',
+      to: email,
+      subject: 'Your Magic Link',
+      text: `Click here to log in: ${link}`,
+    });
+  }
+
+  async validateMagicLink(
+    dto: UsersAuthValidateMagicLinkBody
+  ): Promise<AuthenticatedResponse> {
+    const { userId, token } = dto;
+    const hashedToken = await this.redis.getDel(
+      RedisKeysFactory.magicLink(userId)
+    );
+
+    if (!hashedToken) {
+      throw new HttpException('Invalid magic link', HttpStatus.NOT_FOUND);
+    }
+
+    const isMatch = await bcrypt.compare(token, hashedToken);
+    if (!isMatch) {
+      throw new HttpException('Invalid magic link', HttpStatus.NOT_FOUND);
+    }
+
+    const user = await this.prisma.extended.user.findUnique({
+      where: {
+        id: userId,
+      },
+    });
+
+    return {
+      user,
+      tokens: await this.generateTokens(user),
     };
   }
 

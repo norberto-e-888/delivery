@@ -5,4 +5,5 @@ export const RedisKeysFactory = {
   passwordRecoveryCode: (email: string) => `password-recovery-code:${email}`,
   emailVerificationToken: (userId: string) =>
     `email-verification-token:${userId}`,
+  magicLink: (userId: string) => `magic-link:${userId}`,
 };

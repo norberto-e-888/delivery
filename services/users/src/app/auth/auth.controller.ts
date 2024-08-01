@@ -6,6 +6,8 @@ import {
   UsersAuthSendPasswordRecoveryBody,
   UsersAuthRecoverPasswordBody,
   UsersAuthChangeEmailBody,
+  UsersAuthCreateMagicLinkBody,
+  UsersAuthValidateMagicLinkBody,
 } from '@delivery/api';
 import { AccessTokenPayload, IsLoggedIn, JwtCookie } from '@delivery/auth';
 import { Cookie, Environment } from '@delivery/utils';
@@ -156,6 +158,30 @@ export class AuthController {
     @AccessTokenPayload() atp: AccessTokenPayload
   ) {
     const { tokens, user } = await this.authService.changeEmail(atp.id, body);
+
+    res.cookie(JwtCookie.AccessToken, tokens.accessToken, COOKIE_OPTIONS);
+    res.cookie(JwtCookie.RefreshToken, tokens.refreshToken, COOKIE_OPTIONS);
+
+    return {
+      user,
+    };
+  }
+
+  @Post(UsersAuthEndpoint.CreateMagicLink)
+  async handleCreateMagicLink(@Body() body: UsersAuthCreateMagicLinkBody) {
+    await this.authService.createMagicLink(body.email);
+
+    return {
+      message: 'Please check your email for the magic link',
+    };
+  }
+
+  @Post(UsersAuthEndpoint.ValidateMagicLink)
+  async handleValidateMagicLink(
+    @Body() body: UsersAuthValidateMagicLinkBody,
+    @Res({ passthrough: true }) res: Response
+  ) {
+    const { tokens, user } = await this.authService.validateMagicLink(body);
 
     res.cookie(JwtCookie.AccessToken, tokens.accessToken, COOKIE_OPTIONS);
     res.cookie(JwtCookie.RefreshToken, tokens.refreshToken, COOKIE_OPTIONS);

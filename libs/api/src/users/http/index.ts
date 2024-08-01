@@ -3,6 +3,8 @@ export * from './auth-sign-up';
 export * from './auth-recover-password';
 export * from './auth-send-password-recovery';
 export * from './auth-change-email';
+export * from './auth-create-magic-link';
+export * from './auth-validate-magic-link';
 export * from './profile-update-info';
 export * from './verification-verify-email';
 
@@ -24,6 +26,8 @@ export enum UsersAuthEndpoint {
   RecoverPassword = 'recover-password',
   SendPasswordRecovery = 'send-password-recovery',
   ChangeEmail = 'change-email',
+  CreateMagicLink = 'magic-link',
+  ValidateMagicLink = 'magic-link/validate',
 }
 
 export const UsersAuthEndpointToMethodMap: EndpointToMethodMap<UsersAuthEndpoint> =
@@ -36,6 +40,8 @@ export const UsersAuthEndpointToMethodMap: EndpointToMethodMap<UsersAuthEndpoint
     [UsersAuthEndpoint.RecoverPassword]: 'POST',
     [UsersAuthEndpoint.SendPasswordRecovery]: 'POST',
     [UsersAuthEndpoint.ChangeEmail]: 'PATCH',
+    [UsersAuthEndpoint.CreateMagicLink]: 'POST',
+    [UsersAuthEndpoint.ValidateMagicLink]: 'POST',
   };
 
 export enum UsersProfileEndpoint {
