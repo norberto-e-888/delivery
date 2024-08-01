@@ -2,6 +2,7 @@ export * from './auth-sign-in';
 export * from './auth-sign-up';
 export * from './auth-recover-password';
 export * from './auth-send-password-recovery';
+export * from './auth-change-email';
 export * from './profile-update-info';
 export * from './verification-verify-email';
 
@@ -22,6 +23,7 @@ export enum UsersAuthEndpoint {
   Me = 'me',
   RecoverPassword = 'recover-password',
   SendPasswordRecovery = 'send-password-recovery',
+  ChangeEmail = 'change-email',
 }
 
 export const UsersAuthEndpointToMethodMap: EndpointToMethodMap<UsersAuthEndpoint> =
@@ -33,6 +35,7 @@ export const UsersAuthEndpointToMethodMap: EndpointToMethodMap<UsersAuthEndpoint
     [UsersAuthEndpoint.Me]: 'GET',
     [UsersAuthEndpoint.RecoverPassword]: 'POST',
     [UsersAuthEndpoint.SendPasswordRecovery]: 'POST',
+    [UsersAuthEndpoint.ChangeEmail]: 'PATCH',
   };
 
 export enum UsersProfileEndpoint {

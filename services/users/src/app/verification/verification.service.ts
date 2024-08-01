@@ -37,12 +37,32 @@ export class VerificationService {
   @RabbitSubscribe({
     exchange: UsersTopic.SignUp,
     routingKey: '',
-    queue: UsersQueue.SendEmailVerification,
+    queue: UsersQueue.SendEmailVerificationOnSignUp,
     errorHandler: rabbitMQErrorHandler({
-      queue: UsersQueue.SendEmailVerification,
+      queue: UsersQueue.SendEmailVerificationOnSignUp,
     }),
   })
   protected async sendEmailVerificationOnSignUp(
+    message: RabbitMQMessage<UsersAuthSignUpEventPayload>
+  ) {
+    const {
+      payload: {
+        user: { id },
+      },
+    } = message;
+
+    await this.sendEmailVerification(id);
+  }
+
+  @RabbitSubscribe({
+    exchange: UsersTopic.EmailChanged,
+    routingKey: '',
+    queue: UsersQueue.SendEmailVerificationOnEmailChange,
+    errorHandler: rabbitMQErrorHandler({
+      queue: UsersQueue.SendEmailVerificationOnEmailChange,
+    }),
+  })
+  protected async sendEmailVerificationOnEmailChange(
     message: RabbitMQMessage<UsersAuthSignUpEventPayload>
   ) {
     const {

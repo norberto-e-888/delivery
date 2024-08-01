@@ -5,6 +5,7 @@ import {
   UsersAuthSignUpBody,
   UsersAuthSendPasswordRecoveryBody,
   UsersAuthRecoverPasswordBody,
+  UsersAuthChangeEmailBody,
 } from '@delivery/api';
 import { AccessTokenPayload, IsLoggedIn, JwtCookie } from '@delivery/auth';
 import { Cookie, Environment } from '@delivery/utils';
@@ -14,6 +15,7 @@ import {
   Get,
   HttpException,
   HttpStatus,
+  Patch,
   Post,
   Res,
   UseGuards,
@@ -138,6 +140,22 @@ export class AuthController {
     @Res({ passthrough: true }) res: Response
   ) {
     const { tokens, user } = await this.authService.recoverPassword(body);
+
+    res.cookie(JwtCookie.AccessToken, tokens.accessToken, COOKIE_OPTIONS);
+    res.cookie(JwtCookie.RefreshToken, tokens.refreshToken, COOKIE_OPTIONS);
+
+    return {
+      user,
+    };
+  }
+
+  @Patch(UsersAuthEndpoint.ChangeEmail)
+  async handleChangeEmail(
+    @Body() body: UsersAuthChangeEmailBody,
+    @Res({ passthrough: true }) res: Response,
+    @AccessTokenPayload() atp: AccessTokenPayload
+  ) {
+    const { tokens, user } = await this.authService.changeEmail(atp.id, body);
 
     res.cookie(JwtCookie.AccessToken, tokens.accessToken, COOKIE_OPTIONS);
     res.cookie(JwtCookie.RefreshToken, tokens.refreshToken, COOKIE_OPTIONS);

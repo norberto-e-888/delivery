@@ -4,6 +4,7 @@ import {
   UsersAuthSignUpBody,
   UsersTopic,
   UsersAuthRecoverPasswordBody,
+  UsersAuthChangeEmailBody,
 } from '@delivery/api';
 import { AccessTokenPayload } from '@delivery/auth';
 import { OutboxService } from '@delivery/outbox';
@@ -85,15 +86,15 @@ export class AuthService {
   }
 
   async signIn(dto: UsersAuthSignInBody): Promise<AuthenticatedResponse> {
-    const existingUser = await this.prisma.extended.user.findUnique({
-      where: {
-        email: dto.email,
-      },
-    });
-
-    if (!existingUser) {
-      throw new HttpException('Invalid credentials', HttpStatus.NOT_FOUND);
-    }
+    const existingUser = await this.prisma.extended.user
+      .findUniqueOrThrow({
+        where: {
+          email: dto.email,
+        },
+      })
+      .catch(() => {
+        throw new HttpException('Invalid credentials', HttpStatus.NOT_FOUND);
+      });
 
     const userWithPassword = await this.prisma.user
       .findUniqueOrThrow({
@@ -141,7 +142,18 @@ export class AuthService {
   }
 
   async signOutFromAllDevices(userId: string): Promise<void> {
-    await this.redis.del(RedisKeysFactory.refreshTokens(userId));
+    const multi = this.redis.multi();
+
+    multi.del(RedisKeysFactory.refreshTokens(userId));
+
+    const { accessTokenDuration } =
+      this.configService.get<Config['jwt']>('jwt');
+
+    multi.set(RedisKeysFactory.tokenExpiryOverride(userId), 1, {
+      EX: accessTokenDuration,
+    });
+
+    await multi.exec();
   }
 
   async refreshTokens(userId: string, refreshToken: string): Promise<Tokens> {
@@ -174,30 +186,23 @@ export class AuthService {
      */
 
     await this.signOutFromAllDevices(userId);
-
-    const { accessTokenDuration } =
-      this.configService.get<Config['jwt']>('jwt');
-
-    this.redis.set(RedisKeysFactory.tokenExpiryOverride(userId), 1, {
-      EX: accessTokenDuration,
-    });
   }
 
   async recoverPassword(
     dto: UsersAuthRecoverPasswordBody
   ): Promise<AuthenticatedResponse> {
-    const user = await this.prisma.extended.user.findUnique({
-      where: {
-        email: dto.email,
-      },
-    });
-
-    if (!user) {
-      throw new HttpException(
-        'No user with that email exists on our system',
-        HttpStatus.NOT_FOUND
-      );
-    }
+    const user = await this.prisma.extended.user
+      .findUniqueOrThrow({
+        where: {
+          email: dto.email,
+        },
+      })
+      .catch(() => {
+        throw new HttpException(
+          'No user with that email exists on our system',
+          HttpStatus.NOT_FOUND
+        );
+      });
 
     const passwordRecoveryCodeKey = RedisKeysFactory.passwordRecoveryCode(
       user.email
@@ -270,6 +275,62 @@ export class AuthService {
       subject: 'Password recovery',
       text: `Use this code: ${code} to set a new password`,
     });
+  }
+
+  async changeEmail(
+    userId: string,
+    dto: UsersAuthChangeEmailBody
+  ): Promise<AuthenticatedResponse> {
+    const { updatedUser } = await this.outboxService.publish(
+      async (prisma) => {
+        const user = await prisma.extended.user
+          .findUniqueOrThrow({
+            where: {
+              id: userId,
+            },
+          })
+          .catch(() => {
+            throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+          });
+
+        const existingUser = await prisma.extended.user.findUnique({
+          where: {
+            email: dto.newEmail,
+          },
+        });
+
+        if (existingUser) {
+          throw new HttpException(
+            `${dto.newEmail} is already taken`,
+            HttpStatus.BAD_REQUEST
+          );
+        }
+
+        const updatedUser = await prisma.extended.user.update({
+          where: {
+            id: user.id,
+          },
+          data: {
+            email: dto.newEmail,
+            isEmailVerified: false,
+          },
+        });
+
+        return {
+          updatedUser,
+        };
+      },
+      {
+        exchange: UsersTopic.EmailChanged,
+      }
+    );
+
+    await this.signOutFromAllDevices(updatedUser.id);
+
+    return {
+      user: updatedUser,
+      tokens: await this.generateTokens(updatedUser),
+    };
   }
 
   private async generateTokens(
