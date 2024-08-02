@@ -60,7 +60,7 @@ export class IsLoggedIn implements CanActivate {
         );
       }
 
-      const roles = this.reflector.get(Roles, context.getHandler());
+      const roles = this.reflector.get(SystemRoles, context.getHandler());
 
       if (roles && !roles.some((role) => role === payload.role)) {
         throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
@@ -75,7 +75,7 @@ export class IsLoggedIn implements CanActivate {
   }
 }
 
-export const Roles = Reflector.createDecorator<SystemRole[]>();
+export const SystemRoles = Reflector.createDecorator<SystemRole[]>();
 
 export const AccessTokenPayload = createParamDecorator(
   (_: unknown, ctx: ExecutionContext) => {

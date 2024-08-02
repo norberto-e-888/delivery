@@ -2,7 +2,7 @@
 CREATE TYPE "SystemRole" AS ENUM ('ADMIN', 'ROOT', 'USER');
 
 -- CreateEnum
-CREATE TYPE "RestaurantUserRole" AS ENUM ('ADMIN', 'OWNER');
+CREATE TYPE "RestaurantRole" AS ENUM ('ADMIN', 'OWNER');
 
 -- CreateTable
 CREATE TABLE "Outbox" (
@@ -43,7 +43,7 @@ CREATE TABLE "Restaurant" (
 CREATE TABLE "RestaurantUser" (
     "restaurantId" TEXT NOT NULL,
     "userId" TEXT NOT NULL,
-    "role" "RestaurantUserRole" NOT NULL,
+    "role" "RestaurantRole" NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "RestaurantUser_pkey" PRIMARY KEY ("restaurantId","userId")

@@ -51,17 +51,17 @@ model Restaurant {
 
 model RestaurantUser {
   restaurantId String
-  restaurant   Restaurant         @relation(fields: [restaurantId], references: [id])
+  restaurant   Restaurant     @relation(fields: [restaurantId], references: [id])
   userId       String
-  user         User               @relation(fields: [userId], references: [id])
-  role         RestaurantUserRole
+  user         User           @relation(fields: [userId], references: [id])
+  role         RestaurantRole
 
   createdAt DateTime @default(now())
 
   @@id([restaurantId, userId])
 }
 
-enum RestaurantUserRole {
+enum RestaurantRole {
   ADMIN
   OWNER
 }
