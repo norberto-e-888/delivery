@@ -67,10 +67,13 @@ enum RestaurantUserRole {
 }
 
 model UserDriverInfo {
-  userId String @unique
-  user   User   @relation(fields: [userId], references: [id])
-
+  id            String  @id @default(cuid())
+  userId        String
+  user          User    @relation(fields: [userId], references: [id])
   country       String
   licenceNumber String
   isVerified    Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }

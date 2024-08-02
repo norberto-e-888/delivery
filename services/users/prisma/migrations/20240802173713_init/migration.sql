@@ -51,10 +51,15 @@ CREATE TABLE "RestaurantUser" (
 
 -- CreateTable
 CREATE TABLE "UserDriverInfo" (
+    "id" TEXT NOT NULL,
     "userId" TEXT NOT NULL,
     "country" TEXT NOT NULL,
     "licenceNumber" TEXT NOT NULL,
-    "isVerified" BOOLEAN NOT NULL DEFAULT false
+    "isVerified" BOOLEAN NOT NULL DEFAULT false,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "UserDriverInfo_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateIndex
@@ -62,9 +67,6 @@ CREATE INDEX "Outbox_isSent_createdAt_idx" ON "Outbox"("isSent", "createdAt" ASC
 
 -- CreateIndex
 CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
-
--- CreateIndex
-CREATE UNIQUE INDEX "UserDriverInfo_userId_key" ON "UserDriverInfo"("userId");
 
 -- AddForeignKey
 ALTER TABLE "RestaurantUser" ADD CONSTRAINT "RestaurantUser_restaurantId_fkey" FOREIGN KEY ("restaurantId") REFERENCES "Restaurant"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
