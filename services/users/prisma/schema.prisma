@@ -67,7 +67,6 @@ enum RestaurantRole {
 }
 
 model UserDriverInfo {
-  id            String  @id @default(cuid())
   userId        String
   user          User    @relation(fields: [userId], references: [id])
   country       String
@@ -76,4 +75,6 @@ model UserDriverInfo {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@id([userId, country])
 }

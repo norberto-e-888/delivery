@@ -51,7 +51,6 @@ CREATE TABLE "RestaurantUser" (
 
 -- CreateTable
 CREATE TABLE "UserDriverInfo" (
-    "id" TEXT NOT NULL,
     "userId" TEXT NOT NULL,
     "country" TEXT NOT NULL,
     "licenceNumber" TEXT NOT NULL,
@@ -59,7 +58,7 @@ CREATE TABLE "UserDriverInfo" (
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
-    CONSTRAINT "UserDriverInfo_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "UserDriverInfo_pkey" PRIMARY KEY ("userId","country")
 );
 
 -- CreateIndex
