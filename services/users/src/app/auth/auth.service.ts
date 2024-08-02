@@ -421,7 +421,7 @@ export class AuthService {
 
     const atp: AccessTokenPayload = {
       id: user.id,
-      roles: user.roles,
+      role: user.role,
       isEmailVerified: user.isEmailVerified,
     };
 

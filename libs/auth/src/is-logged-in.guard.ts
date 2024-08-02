@@ -10,7 +10,7 @@ import {
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { JwtService } from '@nestjs/jwt';
-import { UserRole } from '@prisma/users';
+import { SystemRole } from '@prisma/users';
 import { Request } from 'express';
 
 @Injectable()
@@ -62,7 +62,7 @@ export class IsLoggedIn implements CanActivate {
 
       const roles = this.reflector.get(Roles, context.getHandler());
 
-      if (roles && !roles.some((role) => payload.roles.includes(role))) {
+      if (roles && !roles.some((role) => role === payload.role)) {
         throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
       }
 
@@ -75,7 +75,7 @@ export class IsLoggedIn implements CanActivate {
   }
 }
 
-export const Roles = Reflector.createDecorator<UserRole[]>();
+export const Roles = Reflector.createDecorator<SystemRole[]>();
 
 export const AccessTokenPayload = createParamDecorator(
   (_: unknown, ctx: ExecutionContext) => {
@@ -91,7 +91,7 @@ export enum JwtCookie {
 
 export type AccessTokenPayload = {
   id: string;
-  roles: UserRole[];
+  role: SystemRole;
   isEmailVerified: boolean;
 };
 

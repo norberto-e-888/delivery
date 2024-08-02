@@ -9,32 +9,68 @@ datasource db {
 }
 
 model Outbox {
-  id         String   @id @default(cuid())
+  id         String  @id @default(cuid())
   exchange   String
   routingKey String?
   payload    String
-  isSent     Boolean  @default(false)
-  createdAt  DateTime @default(now())
+  isSent     Boolean @default(false)
+
+  createdAt DateTime @default(now())
 
   @@index([isSent, createdAt(sort: Asc)])
 }
 
 model User {
-  id              String     @id @default(cuid())
-  email           String     @unique
-  name            String?
-  password        String?
-  roles           UserRole[]
-  isEmailVerified Boolean    @default(false)
-  createdAt       DateTime   @default(now())
-  updatedAt       DateTime   @updatedAt
+  id               String     @id @default(cuid())
+  email            String     @unique
+  name             String?
+  password         String?
+  role             SystemRole @default(USER)
+  isDrivingEnabled Boolean    @default(false)
+  isEmailVerified  Boolean    @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  driverInfos UserDriverInfo[]
+  restaurants RestaurantUser[]
 }
 
-enum UserRole {
+enum SystemRole {
   ADMIN
-  DINER
-  DRIVER
-  RESTAURANT_ADMIN
-  RESTAURANT_OWNER
   ROOT
+  USER
+}
+
+model Restaurant {
+  id    String           @id @default(cuid())
+  users RestaurantUser[]
+
+  createdAt DateTime @default(now())
+}
+
+model RestaurantUser {
+  restaurantId String
+  restaurant   Restaurant         @relation(fields: [restaurantId], references: [id])
+  userId       String
+  user         User               @relation(fields: [userId], references: [id])
+  role         RestaurantUserRole
+
+  createdAt DateTime @default(now())
+
+  @@id([restaurantId, userId])
+}
+
+enum RestaurantUserRole {
+  ADMIN
+  OWNER
+}
+
+model UserDriverInfo {
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id])
+
+  country       String
+  licenceNumber String
+  isVerified    Boolean @default(false)
 }
