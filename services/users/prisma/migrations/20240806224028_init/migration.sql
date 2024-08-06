@@ -23,7 +23,6 @@ CREATE TABLE "User" (
     "name" TEXT,
     "password" TEXT,
     "role" "SystemRole" NOT NULL DEFAULT 'USER',
-    "isDrivingEnabled" BOOLEAN NOT NULL DEFAULT false,
     "isEmailVerified" BOOLEAN NOT NULL DEFAULT false,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
