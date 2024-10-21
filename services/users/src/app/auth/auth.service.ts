@@ -32,6 +32,7 @@ import { PrismaService } from '../prisma';
 import { TokenService } from '../token/token.service';
 
 const CREATE_PASSWORD_KEY = 'create-password';
+const CHANGE_EMAIL_KEY = 'change-email';
 
 @Injectable()
 export class AuthService {
@@ -171,38 +172,6 @@ export class AuthService {
     });
 
     await multi.exec();
-  }
-
-  async refreshTokens(userId: string, refreshToken: string): Promise<Tokens> {
-    const hashedRefreshTokens = await this.redis.zRange(
-      RedisKeysFactory.refreshTokens(userId),
-      0,
-      -1
-    );
-
-    for (const token of hashedRefreshTokens) {
-      const isTokenValid = token && (await bcrypt.compare(refreshToken, token));
-
-      if (isTokenValid) {
-        const user = await this.prisma.extended.user
-          .findUniqueOrThrow({
-            where: {
-              id: userId,
-            },
-          })
-          .catch(() => {
-            throw new HttpException('User not found', HttpStatus.NOT_FOUND);
-          });
-
-        return this.generateTokens(user, token);
-      }
-    }
-
-    /**
-     * If we made it here, it means the same refresh token was used more than once, which never happens for legitimate users.
-     */
-
-    await this.signOutFromAllDevices(userId);
   }
 
   async sendPasswordRecovery(email: string): Promise<void> {
@@ -422,21 +391,27 @@ export class AuthService {
     };
   }
 
+  async requestEmailChangeToken(userId: string): Promise<void> {
+    await this.tokenService.sendToken(userId, {
+      actionKey: CHANGE_EMAIL_KEY,
+      subject: 'Email Change',
+      text: 'Your token: <TOKEN> Valid for 24 hours.',
+      expiresInMinutes: 60 * 24,
+      maxAttempts: 3,
+    });
+  }
+
   async changeEmail(
     userId: string,
     dto: UsersAuthChangeEmailBody
   ): Promise<AuthenticatedResponse> {
     const { updatedUser } = await this.outboxService.publish(
       async (prisma) => {
-        const user = await prisma.extended.user
-          .findUniqueOrThrow({
-            where: {
-              id: userId,
-            },
-          })
-          .catch(() => {
-            throw new HttpException('User not found', HttpStatus.NOT_FOUND);
-          });
+        await this.tokenService.validateToken(
+          userId,
+          CHANGE_EMAIL_KEY,
+          dto.token
+        );
 
         const existingUser = await prisma.extended.user.findUnique({
           where: {
@@ -453,7 +428,7 @@ export class AuthService {
 
         const updatedUser = await prisma.extended.user.update({
           where: {
-            id: user.id,
+            id: userId,
           },
           data: {
             email: dto.newEmail,
@@ -476,6 +451,38 @@ export class AuthService {
       user: updatedUser,
       tokens: await this.generateTokens(updatedUser),
     };
+  }
+
+  async refreshTokens(userId: string, refreshToken: string): Promise<Tokens> {
+    const hashedRefreshTokens = await this.redis.zRange(
+      RedisKeysFactory.refreshTokens(userId),
+      0,
+      -1
+    );
+
+    for (const token of hashedRefreshTokens) {
+      const isTokenValid = token && (await bcrypt.compare(refreshToken, token));
+
+      if (isTokenValid) {
+        const user = await this.prisma.extended.user
+          .findUniqueOrThrow({
+            where: {
+              id: userId,
+            },
+          })
+          .catch(() => {
+            throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+          });
+
+        return this.generateTokens(user, token);
+      }
+    }
+
+    /**
+     * If we made it here, it means the same refresh token was used more than once, which never happens for legitimate users.
+     */
+
+    await this.signOutFromAllDevices(userId);
   }
 
   private async generateTokens(
