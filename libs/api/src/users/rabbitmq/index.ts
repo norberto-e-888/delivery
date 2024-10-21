@@ -1,4 +1,4 @@
-export * from './auth-change-email';
+export * from './auth-email-changed';
 export * from './auth-sign-up';
 
 export enum UsersTopic {
