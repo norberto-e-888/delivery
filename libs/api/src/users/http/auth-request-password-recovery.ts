@@ -1,7 +1,7 @@
 import { IsEmail, IsString } from 'class-validator';
 
-export class UsersAuthSendPasswordRecoveryBody {
-  @IsEmail()
+export class UsersAuthRequestPasswordRecoveryBody {
   @IsString()
+  @IsEmail()
   email!: string;
 }

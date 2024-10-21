@@ -1,6 +1,6 @@
 import { IsString } from 'class-validator';
 
-export class UsersAuthCreatePasswordBody {
+export class UsersAuthUpdatePasswordBody {
   @IsString()
   token!: string;
 

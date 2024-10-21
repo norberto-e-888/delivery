@@ -1,25 +1,18 @@
 import { randomBytes } from 'crypto';
 
 import {
+  UsersTopic,
   UsersAuthSignUpEventPayload,
   UsersAuthSignInBody,
   UsersAuthSignUpBody,
-  UsersTopic,
-  UsersAuthRecoverPasswordBody,
   UsersAuthChangeEmailBody,
   UsersAuthValidateMagicLinkBody,
-  UsersAuthCreatePasswordBody,
+  UsersAuthUpdatePasswordBody,
 } from '@delivery/api';
 import { AccessTokenPayload } from '@delivery/auth';
 import { OutboxService } from '@delivery/outbox';
 import { REDIS, Redis, SENDGRID, Sendgrid } from '@delivery/providers';
-import {
-  HttpException,
-  HttpStatus,
-  Inject,
-  Injectable,
-  Logger,
-} from '@nestjs/common';
+import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { User } from '@prisma/users';
@@ -31,13 +24,11 @@ import { Config } from '../config';
 import { PrismaService } from '../prisma';
 import { TokenService } from '../token/token.service';
 
-const CREATE_PASSWORD_KEY = 'create-password';
+const CREATE_PASSWORD_KEY = 'update-password';
 const CHANGE_EMAIL_KEY = 'change-email';
 
 @Injectable()
 export class AuthService {
-  private readonly logger = new Logger(AuthService.name);
-
   constructor(
     @Inject(REDIS)
     private readonly redis: Redis,
@@ -174,95 +165,6 @@ export class AuthService {
     await multi.exec();
   }
 
-  async sendPasswordRecovery(email: string): Promise<void> {
-    const user = await this.prisma.extended.user.findUnique({
-      where: {
-        email,
-      },
-    });
-
-    if (!user) {
-      return;
-    }
-
-    const code = uuid().slice(0, 6);
-    const hashedCode = await bcrypt.hash(code, 12);
-
-    await this.redis.set(
-      RedisKeysFactory.passwordRecoveryCode(user.email),
-      hashedCode
-    );
-
-    await this.sendgrid.send({
-      from: 'norberto.e.888@gmail.com',
-      to: email,
-      subject: 'Password recovery',
-      text: `Use this code: ${code} to set a new password`,
-    });
-  }
-
-  async recoverPassword(
-    dto: UsersAuthRecoverPasswordBody
-  ): Promise<AuthenticatedResponse> {
-    const user = await this.prisma.extended.user
-      .findUniqueOrThrow({
-        where: {
-          email: dto.email,
-        },
-      })
-      .catch(() => {
-        throw new HttpException(
-          'No user with that email exists on our system',
-          HttpStatus.NOT_FOUND
-        );
-      });
-
-    const passwordRecoveryCodeKey = RedisKeysFactory.passwordRecoveryCode(
-      user.email
-    );
-
-    const hashedRecoveryCode = await this.redis.get(passwordRecoveryCodeKey);
-    if (!hashedRecoveryCode) {
-      throw new HttpException(
-        'Password recovery flow is not active for this user',
-        HttpStatus.BAD_REQUEST
-      );
-    }
-
-    const isCodeValid = await bcrypt.compare(dto.code, hashedRecoveryCode);
-
-    if (!isCodeValid) {
-      throw new HttpException('Invalid code', HttpStatus.FORBIDDEN);
-    }
-
-    const newHashedPassword = await bcrypt.hash(dto.newPassword, 12);
-
-    await this.prisma.extended.user.update({
-      where: {
-        id: user.id,
-      },
-      data: {
-        password: newHashedPassword,
-      },
-    });
-
-    this.redis
-      .del(passwordRecoveryCodeKey)
-      .then(() => {
-        this.logger.verbose(`Password recovery code deleted for ${dto.email}`);
-      })
-      .catch(() => {
-        this.logger.verbose(
-          `Failed to delete password recovery code deleted for ${dto.email}`
-        );
-      });
-
-    return {
-      user,
-      tokens: await this.generateTokens(user),
-    };
-  }
-
   async createMagicLink(email: string): Promise<void> {
     let user = await this.prisma.extended.user.findUnique({
       where: { email },
@@ -339,120 +241,6 @@ export class AuthService {
     };
   }
 
-  async requestPasswordCreationToken(userId: string): Promise<void> {
-    // eslint-disable-next-line @nx/workspace-no-this-prisma-user
-    const user = await this.prisma.user
-      .findUniqueOrThrow({
-        where: {
-          id: userId,
-        },
-      })
-      .catch(() => {
-        throw new HttpException('User not found', HttpStatus.NOT_FOUND);
-      });
-
-    if (user.password) {
-      throw new HttpException(
-        'User already has a password',
-        HttpStatus.BAD_REQUEST
-      );
-    }
-
-    await this.tokenService.sendToken(userId, {
-      actionKey: CREATE_PASSWORD_KEY,
-      subject: 'Password Creation',
-      text: 'Your token: <TOKEN> Valid for 24 hours.',
-      expiresInMinutes: 60 * 24,
-      maxAttempts: 3,
-    });
-  }
-
-  async createPassword(
-    userId: string,
-    dto: UsersAuthCreatePasswordBody
-  ): Promise<AuthenticatedResponse> {
-    const { token, password } = dto;
-
-    await this.tokenService.validateToken(userId, CREATE_PASSWORD_KEY, token);
-
-    const hashedPassword = await bcrypt.hash(password, 12);
-    const updatedUser = await this.prisma.extended.user.update({
-      where: {
-        id: userId,
-      },
-      data: {
-        password: hashedPassword,
-      },
-    });
-
-    return {
-      tokens: await this.generateTokens(updatedUser),
-      user: updatedUser,
-    };
-  }
-
-  async requestEmailChangeToken(userId: string): Promise<void> {
-    await this.tokenService.sendToken(userId, {
-      actionKey: CHANGE_EMAIL_KEY,
-      subject: 'Email Change',
-      text: 'Your token: <TOKEN> Valid for 24 hours.',
-      expiresInMinutes: 60 * 24,
-      maxAttempts: 3,
-    });
-  }
-
-  async changeEmail(
-    userId: string,
-    dto: UsersAuthChangeEmailBody
-  ): Promise<AuthenticatedResponse> {
-    const { updatedUser } = await this.outboxService.publish(
-      async (prisma) => {
-        const existingUser = await prisma.extended.user.findUnique({
-          where: {
-            email: dto.newEmail,
-          },
-        });
-
-        if (existingUser) {
-          throw new HttpException(
-            `${dto.newEmail} is already taken`,
-            HttpStatus.BAD_REQUEST
-          );
-        }
-
-        await this.tokenService.validateToken(
-          userId,
-          CHANGE_EMAIL_KEY,
-          dto.token
-        );
-
-        const updatedUser = await prisma.extended.user.update({
-          where: {
-            id: userId,
-          },
-          data: {
-            email: dto.newEmail,
-            isEmailVerified: false,
-          },
-        });
-
-        return {
-          updatedUser,
-        };
-      },
-      {
-        exchange: UsersTopic.EmailChanged,
-      }
-    );
-
-    await this.signOutFromAllDevices(updatedUser.id);
-
-    return {
-      user: updatedUser,
-      tokens: await this.generateTokens(updatedUser),
-    };
-  }
-
   async refreshTokens(userId: string, refreshToken: string): Promise<Tokens> {
     const hashedRefreshTokens = await this.redis.zRange(
       RedisKeysFactory.refreshTokens(userId),
@@ -483,6 +271,104 @@ export class AuthService {
      */
 
     await this.signOutFromAllDevices(userId);
+  }
+
+  async requestPasswordUpdateToken(userId: string): Promise<void> {
+    await this.tokenService.sendToken(userId, {
+      actionKey: CREATE_PASSWORD_KEY,
+      subject: 'Password Update',
+      text: 'Your token: <TOKEN> Valid for 24 hours.',
+      expiresInMinutes: 60 * 24,
+      maxAttempts: 3,
+    });
+  }
+
+  async updatePassword(
+    userId: string,
+    dto: UsersAuthUpdatePasswordBody
+  ): Promise<AuthenticatedResponse> {
+    const { token, password } = dto;
+
+    await this.tokenService.validateToken(userId, CREATE_PASSWORD_KEY, token);
+
+    const hashedPassword = await bcrypt.hash(password, 12);
+    const updatedUser = await this.prisma.extended.user.update({
+      where: {
+        id: userId,
+      },
+      data: {
+        password: hashedPassword,
+      },
+    });
+
+    await this.signOutFromAllDevices(updatedUser.id);
+
+    return {
+      tokens: await this.generateTokens(updatedUser),
+      user: updatedUser,
+    };
+  }
+
+  async requestEmailUpdateToken(userId: string): Promise<void> {
+    await this.tokenService.sendToken(userId, {
+      actionKey: CHANGE_EMAIL_KEY,
+      subject: 'Email Change',
+      text: 'Your token: <TOKEN> Valid for 24 hours.',
+      expiresInMinutes: 60 * 24,
+      maxAttempts: 3,
+    });
+  }
+
+  async updateEmail(
+    userId: string,
+    dto: UsersAuthChangeEmailBody
+  ): Promise<AuthenticatedResponse> {
+    const { updatedUser } = await this.outboxService.publish(
+      async (prisma) => {
+        const existingUser = await prisma.extended.user.findUnique({
+          where: {
+            email: dto.email,
+          },
+        });
+
+        if (existingUser) {
+          throw new HttpException(
+            `${dto.email} is already taken`,
+            HttpStatus.BAD_REQUEST
+          );
+        }
+
+        await this.tokenService.validateToken(
+          userId,
+          CHANGE_EMAIL_KEY,
+          dto.token
+        );
+
+        const updatedUser = await prisma.extended.user.update({
+          where: {
+            id: userId,
+          },
+          data: {
+            email: dto.email,
+            isEmailVerified: false,
+          },
+        });
+
+        return {
+          updatedUser,
+        };
+      },
+      {
+        exchange: UsersTopic.EmailChanged,
+      }
+    );
+
+    await this.signOutFromAllDevices(updatedUser.id);
+
+    return {
+      user: updatedUser,
+      tokens: await this.generateTokens(updatedUser),
+    };
   }
 
   private async generateTokens(

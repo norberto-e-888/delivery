@@ -3,13 +3,13 @@ import {
   UsersModule,
   UsersAuthSignInBody,
   UsersAuthSignUpBody,
-  UsersAuthSendPasswordRecoveryBody,
-  UsersAuthRecoverPasswordBody,
   UsersAuthChangeEmailBody,
   UsersAuthCreateMagicLinkBody,
   UsersAuthValidateMagicLinkBody,
   UsersAuthSignOutQuery,
-  UsersAuthCreatePasswordBody,
+  UsersAuthUpdatePasswordBody,
+  UsersAuthRequestPasswordRecoveryBody,
+  UsersAuthRecoverPasswordBody,
 } from '@delivery/api';
 import { AccessTokenPayload, IsLoggedIn, JwtCookie } from '@delivery/auth';
 import { Cookie, Environment } from '@delivery/utils';
@@ -121,57 +121,6 @@ export class AuthController {
     };
   }
 
-  @Post(UsersAuthEndpoint.SendPasswordRecovery)
-  async handleSendPasswordRecovery(
-    @Body() body: UsersAuthSendPasswordRecoveryBody
-  ) {
-    await this.authService.sendPasswordRecovery(body.email);
-
-    return {
-      message: `You will receive a recovery code at ${body.email} if said email exists in our system`,
-    };
-  }
-
-  @Post(UsersAuthEndpoint.RecoverPassword)
-  async handleRecoverPassword(
-    @Body() body: UsersAuthRecoverPasswordBody,
-    @Res({ passthrough: true }) res: Response
-  ) {
-    const { tokens, user } = await this.authService.recoverPassword(body);
-
-    res.cookie(JwtCookie.AccessToken, tokens.accessToken, COOKIE_OPTIONS);
-    res.cookie(JwtCookie.RefreshToken, tokens.refreshToken, COOKIE_OPTIONS);
-
-    return {
-      user,
-    };
-  }
-
-  @UseGuards(IsLoggedIn)
-  @Post(UsersAuthEndpoint.RequestEmailChange)
-  async handleRequestEmailChange(
-    @AccessTokenPayload() atp: AccessTokenPayload
-  ) {
-    await this.authService.requestEmailChangeToken(atp.id);
-  }
-
-  @UseGuards(IsLoggedIn)
-  @Patch(UsersAuthEndpoint.ChangeEmail)
-  async handleChangeEmail(
-    @Body() body: UsersAuthChangeEmailBody,
-    @Res({ passthrough: true }) res: Response,
-    @AccessTokenPayload() atp: AccessTokenPayload
-  ) {
-    const { tokens, user } = await this.authService.changeEmail(atp.id, body);
-
-    res.cookie(JwtCookie.AccessToken, tokens.accessToken, COOKIE_OPTIONS);
-    res.cookie(JwtCookie.RefreshToken, tokens.refreshToken, COOKIE_OPTIONS);
-
-    return {
-      user,
-    };
-  }
-
   @Post(UsersAuthEndpoint.CreateMagicLink)
   async handleCreateMagicLink(@Body() body: UsersAuthCreateMagicLinkBody) {
     await this.authService.createMagicLink(body.email);
@@ -197,21 +146,46 @@ export class AuthController {
   }
 
   @UseGuards(IsLoggedIn)
-  @Post(UsersAuthEndpoint.RequestPasswordCreation)
-  async handleRequestPasswordCreation(
+  @Post(UsersAuthEndpoint.RequestEmailUpdateToken)
+  async handleRequestEmailUpdateToken(
     @AccessTokenPayload() atp: AccessTokenPayload
   ) {
-    await this.authService.requestPasswordCreationToken(atp.id);
+    await this.authService.requestEmailUpdateToken(atp.id);
   }
 
   @UseGuards(IsLoggedIn)
-  @Patch(UsersAuthEndpoint.CreatePassword)
-  async handleCreatePassword(
+  @Patch(UsersAuthEndpoint.UpdateEmail)
+  async handleUpdateEmail(
+    @Body() body: UsersAuthChangeEmailBody,
+    @Res({ passthrough: true }) res: Response,
+    @AccessTokenPayload() atp: AccessTokenPayload
+  ) {
+    const { tokens, user } = await this.authService.updateEmail(atp.id, body);
+
+    res.cookie(JwtCookie.AccessToken, tokens.accessToken, COOKIE_OPTIONS);
+    res.cookie(JwtCookie.RefreshToken, tokens.refreshToken, COOKIE_OPTIONS);
+
+    return {
+      user,
+    };
+  }
+
+  @UseGuards(IsLoggedIn)
+  @Post(UsersAuthEndpoint.RequestPasswordUpdateToken)
+  async handleRequestPasswordUpdateToken(
+    @AccessTokenPayload() atp: AccessTokenPayload
+  ) {
+    await this.authService.requestPasswordUpdateToken(atp.id);
+  }
+
+  @UseGuards(IsLoggedIn)
+  @Patch(UsersAuthEndpoint.UpdatePassword)
+  async handleUpdatePassword(
     @AccessTokenPayload() atp: AccessTokenPayload,
-    @Body() body: UsersAuthCreatePasswordBody,
+    @Body() body: UsersAuthUpdatePasswordBody,
     @Res({ passthrough: true }) res: Response
   ) {
-    const { tokens, user } = await this.authService.createPassword(
+    const { tokens, user } = await this.authService.updatePassword(
       atp.id,
       body
     );
@@ -221,6 +195,54 @@ export class AuthController {
 
     return {
       user,
+    };
+  }
+
+  @Post(UsersAuthEndpoint.RequestPasswordRecoveryToken)
+  async handleRequestPasswordRecoveryToken(
+    @Body() body: UsersAuthRequestPasswordRecoveryBody
+  ) {
+    const user = await this.prisma.extended.user.findUnique({
+      where: {
+        email: body.email,
+      },
+    });
+
+    if (!user) {
+      throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+    }
+
+    await this.authService.requestPasswordUpdateToken(user.id);
+  }
+
+  @Patch(UsersAuthEndpoint.RecoverPassword)
+  async handleRecoverPassword(
+    @Body() body: UsersAuthRecoverPasswordBody,
+    @Res({ passthrough: true }) res: Response
+  ) {
+    const user = await this.prisma.extended.user.findUnique({
+      where: {
+        email: body.email,
+      },
+    });
+
+    if (!user) {
+      throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+    }
+
+    const { tokens, user: updatedUser } = await this.authService.updatePassword(
+      user.id,
+      {
+        password: body.password,
+        token: body.token,
+      }
+    );
+
+    res.cookie(JwtCookie.AccessToken, tokens.accessToken, COOKIE_OPTIONS);
+    res.cookie(JwtCookie.RefreshToken, tokens.refreshToken, COOKIE_OPTIONS);
+
+    return {
+      user: updatedUser,
     };
   }
 

@@ -1,11 +1,11 @@
+export * from './auth-create-magic-link';
+export * from './auth-recover-password';
+export * from './auth-request-password-recovery';
 export * from './auth-sign-in';
 export * from './auth-sign-up';
 export * from './auth-sign-out';
-export * from './auth-recover-password';
-export * from './auth-send-password-recovery';
-export * from './auth-change-email';
-export * from './auth-create-magic-link';
-export * from './auth-create-password';
+export * from './auth-update-email';
+export * from './auth-update-password';
 export * from './auth-validate-magic-link';
 export * from './profile-update-info';
 export * from './verification-verify-email';
@@ -25,14 +25,14 @@ export enum UsersAuthEndpoint {
   SignOut = 'sign-out',
   Refresh = 'refresh',
   Me = 'me',
-  RecoverPassword = 'recover-password',
-  SendPasswordRecovery = 'send-password-recovery',
-  RequestEmailChange = 'request-email-change',
-  ChangeEmail = 'email',
   CreateMagicLink = 'magic-link',
   ValidateMagicLink = 'magic-link/validate',
-  RequestPasswordCreation = 'request-password-creation',
-  CreatePassword = 'password',
+  RequestEmailUpdateToken = 'request-email-update-token',
+  UpdateEmail = 'email',
+  RequestPasswordUpdateToken = 'request-password-update-token',
+  UpdatePassword = 'password',
+  RequestPasswordRecoveryToken = 'request-password-recovery-token',
+  RecoverPassword = 'password/recover',
 }
 
 export const UsersAuthEndpointToMethodMap: EndpointToMethodMap<UsersAuthEndpoint> =
@@ -42,14 +42,14 @@ export const UsersAuthEndpointToMethodMap: EndpointToMethodMap<UsersAuthEndpoint
     [UsersAuthEndpoint.SignOut]: 'POST',
     [UsersAuthEndpoint.Refresh]: 'POST',
     [UsersAuthEndpoint.Me]: 'GET',
-    [UsersAuthEndpoint.RecoverPassword]: 'POST',
-    [UsersAuthEndpoint.SendPasswordRecovery]: 'POST',
-    [UsersAuthEndpoint.RequestEmailChange]: 'PATCH',
-    [UsersAuthEndpoint.ChangeEmail]: 'PATCH',
     [UsersAuthEndpoint.CreateMagicLink]: 'POST',
     [UsersAuthEndpoint.ValidateMagicLink]: 'POST',
-    [UsersAuthEndpoint.RequestPasswordCreation]: 'POST',
-    [UsersAuthEndpoint.CreatePassword]: 'PATCH',
+    [UsersAuthEndpoint.RequestEmailUpdateToken]: 'POST',
+    [UsersAuthEndpoint.UpdateEmail]: 'PATCH',
+    [UsersAuthEndpoint.RequestPasswordUpdateToken]: 'POST',
+    [UsersAuthEndpoint.UpdatePassword]: 'PATCH',
+    [UsersAuthEndpoint.RequestPasswordRecoveryToken]: 'POST',
+    [UsersAuthEndpoint.RecoverPassword]: 'PATCH',
   };
 
 export enum UsersProfileEndpoint {
