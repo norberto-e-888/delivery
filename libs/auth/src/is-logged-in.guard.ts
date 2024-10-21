@@ -49,6 +49,18 @@ export class IsLoggedIn implements CanActivate {
         ignoreExpiration: isRefreshEndpoint,
       });
 
+      const isBlacklisted = await this.redis.sIsMember(
+        `tokens-blacklist:${payload.id}`,
+        accessToken
+      );
+
+      if (isBlacklisted) {
+        throw new HttpException(
+          'Invalid access token',
+          HttpStatus.UNAUTHORIZED
+        );
+      }
+
       const expiryOverride = await this.redis.get(
         `consider-all-tokens-expired:${payload.id}`
       );

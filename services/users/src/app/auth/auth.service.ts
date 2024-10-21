@@ -127,8 +127,19 @@ export class AuthService {
 
   async signOutFromSingleDevice(
     userId: string,
-    refreshToken: string
+    {
+      refreshToken,
+      accessToken,
+    }: {
+      refreshToken: string;
+      accessToken: string;
+    }
   ): Promise<void> {
+    await this.redis.sAdd(
+      RedisKeysFactory.tokensBlacklist(userId),
+      accessToken
+    );
+
     const refreshTokenKey = RedisKeysFactory.refreshTokens(userId);
     const hashedRefreshTokens = await this.redis.zRange(refreshTokenKey, 0, -1);
 

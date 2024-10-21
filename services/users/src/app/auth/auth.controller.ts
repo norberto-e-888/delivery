@@ -80,12 +80,16 @@ export class AuthController {
     @Query() query: UsersAuthSignOutQuery,
     @Res({ passthrough: true }) res: Response,
     @AccessTokenPayload() atp: AccessTokenPayload,
-    @Cookie(JwtCookie.RefreshToken) refreshToken: string
+    @Cookie(JwtCookie.RefreshToken) refreshToken: string,
+    @Cookie(JwtCookie.AccessToken) accessToken: string
   ) {
     if (query.fromAllSessions) {
       await this.authService.signOutFromAllDevices(atp.id);
     } else {
-      await this.authService.signOutFromSingleDevice(atp.id, refreshToken);
+      await this.authService.signOutFromSingleDevice(atp.id, {
+        refreshToken,
+        accessToken,
+      });
     }
 
     res.clearCookie(JwtCookie.AccessToken, COOKIE_OPTIONS);
