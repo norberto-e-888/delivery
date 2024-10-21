@@ -407,12 +407,6 @@ export class AuthService {
   ): Promise<AuthenticatedResponse> {
     const { updatedUser } = await this.outboxService.publish(
       async (prisma) => {
-        await this.tokenService.validateToken(
-          userId,
-          CHANGE_EMAIL_KEY,
-          dto.token
-        );
-
         const existingUser = await prisma.extended.user.findUnique({
           where: {
             email: dto.newEmail,
@@ -425,6 +419,12 @@ export class AuthService {
             HttpStatus.BAD_REQUEST
           );
         }
+
+        await this.tokenService.validateToken(
+          userId,
+          CHANGE_EMAIL_KEY,
+          dto.token
+        );
 
         const updatedUser = await prisma.extended.user.update({
           where: {
