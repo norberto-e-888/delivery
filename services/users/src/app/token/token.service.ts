@@ -72,7 +72,7 @@ export class TokenService {
       attempts: 0,
     };
 
-    await this.redis.hSet(RedisKeysFactory.tokenAction(userId), [
+    await this.redis.hSet(RedisKeysFactory.tokenActions(userId), [
       actionKey,
       JSON.stringify(action),
     ]);
@@ -92,7 +92,7 @@ export class TokenService {
     actionKey: string,
     attemptedValue: string
   ) {
-    const actionsKey = RedisKeysFactory.tokenAction(userId);
+    const actionsKey = RedisKeysFactory.tokenActions(userId);
     const tokenActionRaw = await this.redis.hGet(actionsKey, actionKey);
 
     if (!tokenActionRaw) {

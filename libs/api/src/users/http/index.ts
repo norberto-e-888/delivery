@@ -5,6 +5,7 @@ export * from './auth-recover-password';
 export * from './auth-send-password-recovery';
 export * from './auth-change-email';
 export * from './auth-create-magic-link';
+export * from './auth-create-password';
 export * from './auth-validate-magic-link';
 export * from './profile-update-info';
 export * from './verification-verify-email';
@@ -29,6 +30,8 @@ export enum UsersAuthEndpoint {
   ChangeEmail = 'change-email',
   CreateMagicLink = 'magic-link',
   ValidateMagicLink = 'magic-link/validate',
+  RequestPasswordCreation = 'request-password-creation',
+  CreatePassword = 'password',
 }
 
 export const UsersAuthEndpointToMethodMap: EndpointToMethodMap<UsersAuthEndpoint> =
@@ -43,6 +46,8 @@ export const UsersAuthEndpointToMethodMap: EndpointToMethodMap<UsersAuthEndpoint
     [UsersAuthEndpoint.ChangeEmail]: 'PATCH',
     [UsersAuthEndpoint.CreateMagicLink]: 'POST',
     [UsersAuthEndpoint.ValidateMagicLink]: 'POST',
+    [UsersAuthEndpoint.RequestPasswordCreation]: 'POST',
+    [UsersAuthEndpoint.CreatePassword]: 'PATCH',
   };
 
 export enum UsersProfileEndpoint {

@@ -9,6 +9,7 @@ import {
   UsersAuthCreateMagicLinkBody,
   UsersAuthValidateMagicLinkBody,
   UsersAuthSignOutQuery,
+  UsersAuthCreatePasswordBody,
 } from '@delivery/api';
 import { AccessTokenPayload, IsLoggedIn, JwtCookie } from '@delivery/auth';
 import { Cookie, Environment } from '@delivery/utils';
@@ -164,6 +165,7 @@ export class AuthController {
     };
   }
 
+  @UseGuards(IsLoggedIn)
   @Patch(UsersAuthEndpoint.ChangeEmail)
   async handleChangeEmail(
     @Body() body: UsersAuthChangeEmailBody,
@@ -195,6 +197,34 @@ export class AuthController {
     @Res({ passthrough: true }) res: Response
   ) {
     const { tokens, user } = await this.authService.validateMagicLink(body);
+
+    res.cookie(JwtCookie.AccessToken, tokens.accessToken, COOKIE_OPTIONS);
+    res.cookie(JwtCookie.RefreshToken, tokens.refreshToken, COOKIE_OPTIONS);
+
+    return {
+      user,
+    };
+  }
+
+  @UseGuards(IsLoggedIn)
+  @Post(UsersAuthEndpoint.RequestPasswordCreation)
+  async handleRequestPasswordCreation(
+    @AccessTokenPayload() atp: AccessTokenPayload
+  ) {
+    await this.authService.requestPasswordCreationToken(atp.id);
+  }
+
+  @UseGuards(IsLoggedIn)
+  @Patch(UsersAuthEndpoint.CreatePassword)
+  async handleCreatePassword(
+    @AccessTokenPayload() atp: AccessTokenPayload,
+    @Body() body: UsersAuthCreatePasswordBody,
+    @Res({ passthrough: true }) res: Response
+  ) {
+    const { tokens, user } = await this.authService.createPassword(
+      atp.id,
+      body
+    );
 
     res.cookie(JwtCookie.AccessToken, tokens.accessToken, COOKIE_OPTIONS);
     res.cookie(JwtCookie.RefreshToken, tokens.refreshToken, COOKIE_OPTIONS);

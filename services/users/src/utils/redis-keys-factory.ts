@@ -7,5 +7,5 @@ export const RedisKeysFactory = {
     `email-verification-token:${userId}`,
   magicLink: (userId: string) => `magic-link:${userId}`,
   tokensBlacklist: (userId: string) => `tokens-blacklist:${userId}`,
-  tokenAction: (userId: string) => `token-actions:${userId}`,
+  tokenActions: (userId: string) => `token-actions:${userId}`,
 };
