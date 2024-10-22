@@ -1,8 +1,9 @@
 import { inspect } from 'util';
 
-import { PRISMA } from '@delivery/providers';
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { CommandBus } from '@nestjs/cqrs';
+
+import { PRISMA } from '../prisma';
 
 import { PublishOutboxCommand } from './publish.command';
 import { OutboxPrisma, PrismaService } from './types';

@@ -1,3 +1,4 @@
+export * from './outbox';
 export * from './rabbitmq';
 export * from './jwt';
 export * from './prisma';

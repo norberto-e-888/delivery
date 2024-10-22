@@ -1,9 +1,10 @@
-import { PRISMA } from '@delivery/providers';
 import { RabbitMQMessage } from '@delivery/utils';
 import { AmqpConnection } from '@golevelup/nestjs-rabbitmq';
 import { InjectQueue, Processor, WorkerHost } from '@nestjs/bullmq';
 import { Inject, Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { Job, Queue } from 'bullmq';
+
+import { PRISMA } from '../prisma';
 
 import { PrismaClient } from './types';
 

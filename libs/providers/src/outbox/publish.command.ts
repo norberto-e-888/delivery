@@ -1,8 +1,9 @@
-import { PRISMA } from '@delivery/providers';
 import { RabbitMQMessage } from '@delivery/utils';
 import { AmqpConnection } from '@golevelup/nestjs-rabbitmq';
 import { Inject, Logger } from '@nestjs/common';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
+
+import { PRISMA } from '../prisma';
 
 import { OutboxPrisma, PrismaClient } from './types';
 

@@ -1,8 +1,9 @@
-import { RedisConfig } from '@delivery/providers';
 import { BullModule } from '@nestjs/bullmq';
 import { Global, Module } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { CqrsModule } from '@nestjs/cqrs';
+
+import { RedisConfig } from '../redis';
 
 import {
   OUTBOX_QUEUE,

@@ -10,8 +10,13 @@ import {
   UsersAuthUpdatePasswordBody,
 } from '@delivery/api';
 import { AccessTokenPayload } from '@delivery/auth';
-import { OutboxService } from '@delivery/outbox';
-import { REDIS, Redis, SENDGRID, Sendgrid } from '@delivery/providers';
+import {
+  REDIS,
+  Redis,
+  SENDGRID,
+  Sendgrid,
+  OutboxService,
+} from '@delivery/providers';
 import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';

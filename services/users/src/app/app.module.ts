@@ -1,11 +1,11 @@
 import { Service, UsersTopic } from '@delivery/api';
-import { OutboxModule } from '@delivery/outbox';
 import {
   JwtModule,
   PrismaModule,
   RabbitMQModule,
   RedisModule,
   SendgridModule,
+  OutboxModule,
 } from '@delivery/providers';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
