@@ -152,16 +152,8 @@ export class AuthService {
 
   async signOutFromAllDevices(userId: string): Promise<void> {
     const multi = this.redis.multi();
-
     multi.del(RedisKeysFactory.refreshTokens(userId));
-
-    const { accessTokenDuration } =
-      this.configService.get<Config['jwt']>('jwt');
-
-    multi.set(RedisKeysFactory.tokenExpiryOverride(userId), 1, {
-      EX: accessTokenDuration,
-    });
-
+    this.overrideTokenExpiry(userId, multi);
     await multi.exec();
   }
 
@@ -264,7 +256,7 @@ export class AuthService {
 
       // we need to invalidate all current live tokens to trigger a refresh on all of the user's sessions so they get the
       // updated isEmailVerified flag in their ATP
-      await this.tokenExpiryOverride(user.id);
+      await this.overrideTokenExpiry(user.id);
     }
 
     return {
@@ -423,13 +415,22 @@ export class AuthService {
     };
   }
 
-  private async tokenExpiryOverride(userId: string): Promise<void> {
+  private async overrideTokenExpiry(
+    userId: string,
+    multi?: ReturnType<Redis['multi']>
+  ): Promise<void> {
     const { accessTokenDuration } =
       this.configService.get<Config['jwt']>('jwt');
 
-    await this.redis.set(RedisKeysFactory.tokenExpiryOverride(userId), 1, {
-      EX: accessTokenDuration,
-    });
+    if (multi) {
+      multi.set(RedisKeysFactory.tokenExpiryOverride(userId), 1, {
+        EX: accessTokenDuration,
+      });
+    } else {
+      await this.redis.set(RedisKeysFactory.tokenExpiryOverride(userId), 1, {
+        EX: accessTokenDuration,
+      });
+    }
   }
 }
 
