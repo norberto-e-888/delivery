@@ -3,8 +3,8 @@
   "version": "0.0.0",
   "license": "MIT",
   "scripts": {
-    "up": "docker compose -f ./compose.local.yml up -d",
-    "down": "docker compose -f ./compose.local.yml down",
+    "up": "docker compose -f ./docker/docker-compose.yml up -d",
+    "down": "docker compose -f ./docker/docker-compose.yml down",
     "generate": "prisma generate --schema=./services/$SERVICE/prisma/schema.prisma",
     "migrate": "prisma migrate dev --schema=./services/$SERVICE/prisma/schema.prisma",
     "migrate-create-only": "prisma migrate dev --schema=./services/$SERVICE/prisma/schema.prisma --create-only",
