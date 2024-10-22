@@ -34,14 +34,7 @@
       "options": {
         "targetName": "test"
       },
-      "exclude": [
-        "services/delivery-e2e/**/*",
-        "services/marketplace-e2e/**/*",
-        "services/messaging-e2e/**/*",
-        "services/notifications-e2e/**/*",
-        "services/payments-e2e/**/*",
-        "services/users-e2e/**/*"
-      ]
+      "exclude": ["services/users-e2e/**/*"]
     }
   ],
   "nxCloudAccessToken": "Yjk0ZjQ1ZGUtOWU0Ny00ZTRkLTg1ZGYtODI2MmIxMjAzNzJkfHJlYWQtd3JpdGU="
