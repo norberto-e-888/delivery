@@ -48,7 +48,7 @@ export const loadConfig = () => {
     maxSessions: +process.env.MAX_SESSIONS,
   };
 
-  const validationSchema = Joi.any()
+  const validationSchema = Joi.object()
     .concat(jwtConfigJoiSchema)
     .concat(prismaConfigJoiSchema)
     .concat(redisConfigJoiSchema)
