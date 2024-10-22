@@ -165,6 +165,38 @@ export class AuthService {
     await multi.exec();
   }
 
+  async refreshTokens(userId: string, refreshToken: string): Promise<Tokens> {
+    const hashedRefreshTokens = await this.redis.zRange(
+      RedisKeysFactory.refreshTokens(userId),
+      0,
+      -1
+    );
+
+    for (const token of hashedRefreshTokens) {
+      const isTokenValid = token && (await bcrypt.compare(refreshToken, token));
+
+      if (isTokenValid) {
+        const user = await this.prisma.extended.user
+          .findUniqueOrThrow({
+            where: {
+              id: userId,
+            },
+          })
+          .catch(() => {
+            throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+          });
+
+        return this.generateTokens(user, token);
+      }
+    }
+
+    /**
+     * If we made it here, it means the same refresh token was used more than once, which never happens for legitimate users.
+     */
+
+    await this.signOutFromAllDevices(userId);
+  }
+
   async createMagicLink(email: string): Promise<void> {
     let user = await this.prisma.extended.user.findUnique({
       where: { email },
@@ -239,38 +271,6 @@ export class AuthService {
       user,
       tokens: await this.generateTokens(user),
     };
-  }
-
-  async refreshTokens(userId: string, refreshToken: string): Promise<Tokens> {
-    const hashedRefreshTokens = await this.redis.zRange(
-      RedisKeysFactory.refreshTokens(userId),
-      0,
-      -1
-    );
-
-    for (const token of hashedRefreshTokens) {
-      const isTokenValid = token && (await bcrypt.compare(refreshToken, token));
-
-      if (isTokenValid) {
-        const user = await this.prisma.extended.user
-          .findUniqueOrThrow({
-            where: {
-              id: userId,
-            },
-          })
-          .catch(() => {
-            throw new HttpException('User not found', HttpStatus.NOT_FOUND);
-          });
-
-        return this.generateTokens(user, token);
-      }
-    }
-
-    /**
-     * If we made it here, it means the same refresh token was used more than once, which never happens for legitimate users.
-     */
-
-    await this.signOutFromAllDevices(userId);
   }
 
   async requestPasswordUpdateToken(userId: string): Promise<void> {

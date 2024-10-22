@@ -104,6 +104,24 @@ export class AuthController {
   }
 
   @UseGuards(IsLoggedIn)
+  @Post(UsersAuthEndpoint.Refresh)
+  async handleRefresh(
+    @Res({ passthrough: true }) res: Response,
+    @AccessTokenPayload() atp: AccessTokenPayload,
+    @Cookie(JwtCookie.RefreshToken) refreshToken: string
+  ) {
+    const { accessToken, refreshToken: newRefreshToken } =
+      await this.authService.refreshTokens(atp.id, refreshToken);
+
+    res.cookie(JwtCookie.AccessToken, accessToken, COOKIE_OPTIONS);
+    res.cookie(JwtCookie.RefreshToken, newRefreshToken, COOKIE_OPTIONS);
+
+    return {
+      message: 'Successfully refreshed tokens',
+    };
+  }
+
+  @UseGuards(IsLoggedIn)
   @Get(UsersAuthEndpoint.Me)
   async handleMe(@AccessTokenPayload() atp: AccessTokenPayload) {
     const user = await this.prisma.extended.user
@@ -243,24 +261,6 @@ export class AuthController {
 
     return {
       user: updatedUser,
-    };
-  }
-
-  @UseGuards(IsLoggedIn)
-  @Post(UsersAuthEndpoint.Refresh)
-  async handleRefresh(
-    @Res({ passthrough: true }) res: Response,
-    @AccessTokenPayload() atp: AccessTokenPayload,
-    @Cookie(JwtCookie.RefreshToken) refreshToken: string
-  ) {
-    const { accessToken, refreshToken: newRefreshToken } =
-      await this.authService.refreshTokens(atp.id, refreshToken);
-
-    res.cookie(JwtCookie.AccessToken, accessToken, COOKIE_OPTIONS);
-    res.cookie(JwtCookie.RefreshToken, newRefreshToken, COOKIE_OPTIONS);
-
-    return {
-      message: 'Successfully refreshed tokens',
     };
   }
 }
